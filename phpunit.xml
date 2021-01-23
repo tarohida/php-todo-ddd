@@ -2,6 +2,6 @@
 <phpunit colors="true"
          verbose="true">
  <testsuite name="PHP TODO TEST">
-  <directory>../tests</directory>
+  <directory>./tests</directory>
  </testsuite>
 </phpunit>
