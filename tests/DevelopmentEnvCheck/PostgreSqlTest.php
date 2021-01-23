@@ -18,9 +18,9 @@ class PostgreSqlTest extends TestCase
     public function test_check_connect_to_postgresql()
     {
         $pdo = new PDO(
-            'pgsql:host=db;dbname=dbname;',
-            'dbuser',
-            'dbpassword',
+            'pgsql:host=db;dbname=db_name;',
+            'db_user',
+            'db_password',
             [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
         );
         self::assertInstanceOf(PDO::class, $pdo);
