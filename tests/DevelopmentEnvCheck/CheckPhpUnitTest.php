@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
  *
  * if you get error in this test, your php environment or phpunit environment may something wrong.
  */
-class CheckPhpUnit extends TestCase
+class CheckPhpUnitTest extends TestCase
 {
     public function test_check_phpunit()
     {
