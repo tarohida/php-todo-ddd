@@ -6,6 +6,6 @@ namespace App\Domain\Task;
 
 interface TaskRepository
 {
-    public function find(string $task_id): ?Task;
+    public function find(int $task_id): ?Task;
 
 }
