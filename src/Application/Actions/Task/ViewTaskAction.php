@@ -4,14 +4,13 @@
 namespace App\Application\Actions\Task;
 
 
-use App\Application\Actions\Action;
 use App\Application\Actions\ActionInterface;
 use App\Application\DTO\Task\TaskData;
 use App\Application\Exception\HttpNotFoundException;
 use App\Domain\Task\TaskRepository;
 use App\Domain\Task\TaskService;
 
-class ViewTaskAction extends Action implements ActionInterface
+class ViewTaskAction implements ActionInterface
 {
     private TaskRepository $task_repository;
     private TaskService $task_service;
