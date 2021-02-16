@@ -8,4 +8,5 @@ interface TaskRepository
 {
     public function find(int $task_id): ?Task;
 
+    public function list(): ?TaskList;
 }

@@ -6,6 +6,7 @@ namespace App\Infrastructure\Task;
 
 use App\Domain\Task\Task;
 
+use App\Domain\Task\TaskList;
 use App\Domain\Task\TaskRepository;
 use App\Infrastructure\Task\Exception\DuplicatedTaskException;
 use UnexpectedValueException;
@@ -48,5 +49,24 @@ SQL;
             return new Task($result[0]['id'], $result[0]['title']);
         }
         throw new UnexpectedValueException('PDO response format is unexpected.');
+    }
+
+    public function list(): TaskList
+    {
+        $query = <<< SQL
+SELECT * from tasks
+SQL;
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $task_array = [];
+        foreach ($result as $task) {
+            if (!isset($task['id']) || !isset($task['title'])) {
+                throw new UnexpectedValueException('PDO response format is unexpected.');
+            }
+            $task_array[] = new Task($task['id'], $task['title']);
+        }
+        return new TaskList($task_array);
     }
 }

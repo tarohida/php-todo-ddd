@@ -4,6 +4,7 @@
 namespace Tests\Infrastructure\Task;
 
 
+use App\Domain\Task\TaskList;
 use App\Domain\Task\TaskRepository;
 use App\Infrastructure\Task\TaskDB;
 use PDO;
@@ -42,24 +43,30 @@ class TaskDBTest extends TestCase
         $query = <<< SQL
 INSERT INTO tasks
 VALUES (
-        1, 'title_1'
+        :id, :title
 );
 SQL;
+        $id = 1;
+        $title = 'title1';
         $stmt = $this->pdo->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->bindParam(':title', $title);
+        $stmt->execute();
+        $id = 2;
+        $title = 'title2';
         $stmt->execute();
     }
 
+    /** @noinspection SqlWithoutWhere */
     public function empty()
     {
         $query = <<< SQL
 DELETE from tasks 
-where id = 1;
 SQL;
         $stmt = $this->pdo->prepare($query);
         $stmt->execute();
 
     }
-
 
     public function test_construct()
     {
@@ -81,7 +88,23 @@ SQL;
     public function test_method_find_return_null()
     {
         $task_repository = new TaskDB($this->pdo);
-        $task = $task_repository->find(2);
+        $task = $task_repository->find(254);
         $this->assertSame(null, $task);
+    }
+
+    public function test_method_list()
+    {
+        $task_repository = new TaskDB($this->pdo);
+        $task_list = $task_repository->list();
+        $this->assertInstanceOf(TaskList::class, $task_list);
+        $this->assertCount(2, $task_list);
+    }
+
+    public function test_method_list__return_empty_task_list()
+    {
+        $this->empty();
+        $task_repository = new TaskDB($this->pdo);
+        $task_list = $task_repository->list();
+        $this->assertCount(0, $task_list);
     }
 }
