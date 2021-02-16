@@ -38,11 +38,12 @@ SQL;
         $stmt = $this->pdo->prepare($query);
         $stmt->bindValue(':task_id', $task_id);
         $stmt->execute();
-        $result = $stmt->fetchAll();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         if (empty($result)) {
             return null;
         }
         if (count($result) >= 2) {
+            // Task must not be duplicated.
             throw new DuplicatedTaskException("task_id: $task_id");
         }
         if (isset($result[0]['id']) && isset($result[0]['title'])) {
