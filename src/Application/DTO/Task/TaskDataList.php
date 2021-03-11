@@ -8,7 +8,7 @@ use Iterator;
 
 class TaskDataList implements Iterator
 {
-    private array $task_data;
+    private array $task_data_array;
     private int $position;
 
     /**
@@ -26,12 +26,12 @@ class TaskDataList implements Iterator
 
     private function add(TaskData $task_data)
     {
-        $this->task_data[] = $task_data;
+        $this->task_data_array[] = $task_data;
     }
 
     public function current(): TaskData
     {
-        return $this->task_data[$this->position];
+        return $this->task_data_array[$this->position];
     }
 
     public function next()
@@ -46,11 +46,16 @@ class TaskDataList implements Iterator
 
     public function valid(): bool
     {
-        return isset($this->task_data[$this->position]);
+        return isset($this->task_data_array[$this->position]);
     }
 
     public function rewind()
     {
         $this->position = 0;
+    }
+
+    public function isEmpty(): bool
+    {
+        return empty($this->task_data_array);
     }
 }

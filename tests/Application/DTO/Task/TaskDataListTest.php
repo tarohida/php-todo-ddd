@@ -51,4 +51,11 @@ class TaskDataListTest extends TestCase
             $this->assertInstanceOf(TaskData::class, $task_data);
         }
     }
+
+    public function test_method_isEmpty()
+    {
+        $task_data_list = new TaskDataList([]);
+        $this->assertTrue($task_data_list->isEmpty());
+
+    }
 }
