@@ -6,13 +6,15 @@ namespace App\Infrastructure\Task;
 
 use App\Domain\Task\Task;
 
+use App\Domain\Task\TaskInterface;
 use App\Domain\Task\TaskList;
-use App\Domain\Task\TaskRepository;
+use App\Domain\Task\TaskListInterface;
+use App\Domain\Task\TaskRepositoryInterface;
 use App\Infrastructure\Task\Exception\DuplicatedTaskException;
 use UnexpectedValueException;
 use PDO;
 
-class TaskDB implements TaskRepository
+class TaskRepository implements TaskRepositoryInterface
 {
 
     private PDO $pdo;
@@ -24,11 +26,11 @@ class TaskDB implements TaskRepository
 
     /**
      * @param int $task_id
-     * @return Task|null
+     * @return TaskInterface|null
      * @throws DuplicatedTaskException
      * @throws UnexpectedValueException
      */
-    public function find(int $task_id): ?Task
+    public function find(int $task_id): ?TaskInterface
     {
         $query = <<< SQL
 SELECT * from tasks
@@ -52,7 +54,7 @@ SQL;
         throw new UnexpectedValueException('PDO response format is unexpected.');
     }
 
-    public function list(): TaskList
+    public function list(): TaskListInterface
     {
         $query = <<< SQL
 SELECT * from tasks

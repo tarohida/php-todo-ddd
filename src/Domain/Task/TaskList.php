@@ -4,9 +4,7 @@
 namespace App\Domain\Task;
 
 
-use Iterator;
-
-class TaskList implements Iterator
+class TaskList implements TaskListInterface
 {
     private int $position;
     private array $task_list;
@@ -20,12 +18,12 @@ class TaskList implements Iterator
         }
     }
 
-    private function add(Task $task)
+    private function add(TaskInterface $task)
     {
         $this->task_list[] = $task;
     }
 
-    public function current(): Task
+    public function current(): TaskInterface
     {
         return $this->task_list[$this->position];
     }

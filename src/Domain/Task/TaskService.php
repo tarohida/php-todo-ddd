@@ -4,23 +4,23 @@
 namespace App\Domain\Task;
 
 
-class TaskService
+class TaskService implements TaskServiceInterface
 {
     /**
-     * @var TaskRepository
+     * @var TaskRepositoryInterface
      */
-    private TaskRepository $repository;
+    private TaskRepositoryInterface $repository;
 
-    public function __construct(TaskRepository $repository)
+    public function __construct(TaskRepositoryInterface $repository)
     {
         $this->repository = $repository;
     }
 
     /**
-     * @param Task $task
+     * @param TaskInterface $task
      * @return bool
      */
-    public function exists(Task $task): bool
+    public function exists(TaskInterface $task): bool
     {
         $task = $this->repository->find($task->id());
         return !is_null($task);

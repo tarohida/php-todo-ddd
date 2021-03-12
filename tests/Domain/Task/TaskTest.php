@@ -5,6 +5,7 @@ namespace Tests\Domain\Task;
 
 
 use App\Domain\Task\Task;
+use App\Domain\Task\TaskInterface;
 use PHPUnit\Framework\TestCase;
 
 class TaskTest extends TestCase
@@ -12,9 +13,9 @@ class TaskTest extends TestCase
     private int $id;
     private string $title;
     /**
-     * @var Task
+     * @var TaskInterface
      */
-    private Task $task;
+    private TaskInterface $task;
 
     public function setUp(): void
     {

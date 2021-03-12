@@ -4,10 +4,10 @@
 namespace App\Application\Actions;
 
 
-use App\Domain\Task\TaskRepository;
-use App\Domain\Task\TaskService;
+use App\Domain\Task\TaskRepositoryInterface;
+use App\Domain\Task\TaskServiceInterface;
 
 interface ActionInterface
 {
-    public function __construct(TaskRepository $task_repository, TaskService $task_service);
+    public function __construct(TaskRepositoryInterface $task_repository, TaskServiceInterface $task_service);
 }

@@ -7,26 +7,26 @@ namespace App\Application\Actions\Task;
 use App\Application\Actions\ActionInterface;
 use App\Application\DTO\Task\TaskData;
 use App\Application\DTO\Task\TaskDataList;
-use App\Domain\Task\TaskRepository;
-use App\Domain\Task\TaskService;
+use App\Domain\Task\TaskRepositoryInterface;
+use App\Domain\Task\TaskServiceInterface;
 
 class ListTaskAction implements ActionInterface
 {
     /**
-     * @var TaskRepository
+     * @var TaskRepositoryInterface
      */
-    private TaskRepository $task_repository;
+    private TaskRepositoryInterface $task_repository;
     /**
-     * @var TaskService
+     * @var TaskServiceInterface
      */
-    private TaskService $task_service;
+    private TaskServiceInterface $task_service;
 
     /**
      * ViewListAction constructor.
      * @param $task_repository
-     * @param TaskService $task_service
+     * @param TaskServiceInterface $task_service
      */
-    public function __construct(TaskRepository $task_repository, TaskService $task_service)
+    public function __construct(TaskRepositoryInterface $task_repository, TaskServiceInterface $task_service)
     {
         $this->task_repository = $task_repository;
         $this->task_service = $task_service;

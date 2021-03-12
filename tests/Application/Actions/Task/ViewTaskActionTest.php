@@ -8,8 +8,9 @@ use App\Application\Actions\ActionInterface;
 use App\Application\Actions\Task\ViewTaskAction;
 use App\Application\DTO\Task\TaskData;
 use App\Domain\Task\Task;
-use App\Domain\Task\TaskRepository;
+use App\Domain\Task\TaskRepositoryInterface;
 use App\Domain\Task\TaskService;
+use App\Domain\Task\TaskServiceInterface;
 use PHPUnit\Framework\MockObject\Stub;
 use App\Application\Exception\HttpNotFoundException;
 use PHPUnit\Framework\TestCase;
@@ -17,17 +18,17 @@ use PHPUnit\Framework\TestCase;
 class ViewTaskActionTest extends TestCase
 {
     /**
-     * @var TaskRepository|Stub
+     * @var TaskRepositoryInterface|Stub
      */
     private $task_repository;
     /**
-     * @var TaskService|Stub
+     * @var TaskServiceInterface|Stub
      */
     private $task_service;
 
     public function setUp(): void
     {
-        $this->task_repository = $this->createStub(TaskRepository::class);
+        $this->task_repository = $this->createStub(TaskRepositoryInterface::class);
         $this->task_service = $this->createStub(TaskService::class);
     }
     public function test_construct()

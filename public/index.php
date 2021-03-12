@@ -6,7 +6,7 @@ use App\Application\Actions\Task\ViewTaskAction;
 use App\Application\Controller\Http\ListTaskController;
 use App\Application\Controller\Http\ViewTaskController;
 use App\Domain\Task\TaskService;
-use App\Infrastructure\Task\TaskDB;
+use App\Infrastructure\Task\TaskRepository;
 use DI\Container;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -16,7 +16,7 @@ use Slim\Factory\AppFactory;
 require __DIR__ . '/../vendor/autoload.php';
 
 $container = new Container();
-$container->set(TaskDB::class, function () {
+$container->set(TaskRepository::class, function () {
     $db_host = 'db';
     $db_name = 'db_name';
     $db_user = 'db_user';
@@ -27,22 +27,22 @@ $container->set(TaskDB::class, function () {
         $db_password,
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
-    return new TaskDB($pdo);
+    return new TaskRepository($pdo);
 });
 
 $container->set(TaskService::class, function (ContainerInterface $container) {
-    $db = $container->get(TaskDB::class);
+    $db = $container->get(TaskRepository::class);
     return new TaskService($db);
 });
 
 $container->set(ViewTaskAction::class, function (ContainerInterface $container) {
-    $db = $container->get(TaskDB::class);
+    $db = $container->get(TaskRepository::class);
     $service = $container->get(TaskService::class);
     return new ViewTaskAction($db, $service);
 });
 
 $container->set(ListTaskAction::class, function (ContainerInterface $container) {
-    $db = $container->get(TaskDB::class);
+    $db = $container->get(TaskRepository::class);
     $service = $container->get(TaskService::class);
     return new ListTaskAction($db, $service);
 });

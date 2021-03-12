@@ -5,7 +5,8 @@ namespace Tests\Domain\Task;
 
 
 use App\Domain\Task\Task;
-use App\Domain\Task\TaskRepository;
+use App\Domain\Task\TaskInterface;
+use App\Domain\Task\TaskRepositoryInterface;
 use App\Domain\Task\TaskService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -13,14 +14,14 @@ use PHPUnit\Framework\TestCase;
 class TaskServiceTest extends TestCase
 {
     /**
-     * @var TaskRepository|MockObject
+     * @var TaskRepositoryInterface|MockObject
      */
     private $repository;
 
     public function setUp(): void
     {
 
-        $this->repository = $this->createStub(TaskRepository::class);
+        $this->repository = $this->createStub(TaskRepositoryInterface::class);
     }
 
     public function test_construct()
@@ -30,11 +31,11 @@ class TaskServiceTest extends TestCase
 
     /**
      * @dataProvider boolProvider
-     * @param Task $input_task
-     * @param Task|null $output_task
+     * @param TaskInterface $input_task
+     * @param TaskInterface|null $output_task
      * @param bool $expected
      */
-    public function test_exists(Task $input_task, ?Task $output_task, bool $expected)
+    public function test_exists(TaskInterface $input_task, ?TaskInterface $output_task, bool $expected)
     {
         $this->repository->method('find')->willReturn($output_task);
         $task_service = new TaskService($this->repository);

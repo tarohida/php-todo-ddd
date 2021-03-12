@@ -4,7 +4,7 @@
 namespace App\Domain\Task;
 
 
-class Task
+class Task implements TaskInterface
 {
     private string $title;
     private int $id;

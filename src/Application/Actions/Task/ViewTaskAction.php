@@ -7,20 +7,20 @@ namespace App\Application\Actions\Task;
 use App\Application\Actions\ActionInterface;
 use App\Application\DTO\Task\TaskData;
 use App\Application\Exception\HttpNotFoundException;
-use App\Domain\Task\TaskRepository;
-use App\Domain\Task\TaskService;
+use App\Domain\Task\TaskRepositoryInterface;
+use App\Domain\Task\TaskServiceInterface;
 
 class ViewTaskAction implements ActionInterface
 {
-    private TaskRepository $task_repository;
-    private TaskService $task_service;
+    private TaskRepositoryInterface $task_repository;
+    private TaskServiceInterface $task_service;
 
     /**
      * ViewTaskAction constructor.
-     * @param $task_repository
-     * @param TaskService $task_service
+     * @param TaskRepositoryInterface $task_repository
+     * @param TaskServiceInterface $task_service
      */
-    public function __construct(TaskRepository $task_repository, TaskService $task_service)
+    public function __construct(TaskRepositoryInterface $task_repository, TaskServiceInterface $task_service)
     {
         $this->task_repository = $task_repository;
         $this->task_service = $task_service;
