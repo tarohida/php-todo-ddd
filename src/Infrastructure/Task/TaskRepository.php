@@ -72,4 +72,17 @@ SQL;
         }
         return new TaskList($task_array);
     }
+
+    public function save(TaskInterface $task): void
+    {
+        $query = <<< SQL
+INSERT INTO tasks (id, title) VALUES (:id, :title)
+SQL;
+        $pdo_statement = $this->pdo->prepare($query);
+        $id = $task->id();
+        $title = $task->title();
+        $pdo_statement->bindParam(':id', $id, PDO::PARAM_INT);
+        $pdo_statement->bindParam('title', $title, PDO::PARAM_STR);
+        $pdo_statement->execute();
+    }
 }

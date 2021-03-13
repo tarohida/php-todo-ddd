@@ -11,7 +11,7 @@ use App\Infrastructure\Task\TaskRepository;
 use PDO;
 use PHPUnit\Framework\TestCase;
 
-class TaskDBTest extends TestCase
+class TaskRepositoryTest extends TestCase
 {
     private PDO $pdo;
 
@@ -107,5 +107,14 @@ SQL;
         $task_repository = new TaskRepository($this->pdo);
         $task_list = $task_repository->list();
         $this->assertCount(0, $task_list);
+    }
+
+    public function test_method_save()
+    {
+        $task = new Task(10, 'title1');
+        $task_repository = new TaskRepository($this->pdo);
+        $task_repository->save($task);
+
+        $this->assertInstanceOf(Task::class, $task_repository->find(10));
     }
 }
