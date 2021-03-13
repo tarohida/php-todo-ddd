@@ -44,9 +44,15 @@ $container->set(ViewTaskAction::class, function (ContainerInterface $container) 
 });
 
 $container->set(ListTaskAction::class, function (ContainerInterface $container) {
-    $db = $container->get(TaskRepository::class);
+    $repository = $container->get(TaskRepository::class);
     $service = $container->get(TaskService::class);
-    return new ListTaskAction($db, $service);
+    return new ListTaskAction($repository, $service);
+});
+
+$container->set(CreateTaskAction::class, function (ContainerInterface $container) {
+    $repository = $container->get(TaskRepository::class);
+    $service = $container->get(TaskService::class);
+    return new CreateTaskAction($repository, $service);
 });
 
 $container->set(ViewTaskController::class, function (ContainerInterface $container) {
