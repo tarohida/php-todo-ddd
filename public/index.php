@@ -1,8 +1,10 @@
 <?php
 declare(strict_types=1);
 
+use App\Application\Actions\Task\CreateTaskAction;
 use App\Application\Actions\Task\ListTaskAction;
 use App\Application\Actions\Task\ViewTaskAction;
+use App\Application\Controller\Http\CreateTaskController;
 use App\Application\Controller\Http\ListTaskController;
 use App\Application\Controller\Http\ViewTaskController;
 use App\Domain\Task\TaskService;
@@ -57,6 +59,11 @@ $container->set(ListTaskController::class, function (ContainerInterface $contain
     return new ListTaskController($action);
 });
 
+$container->set(CreateTaskController::class, function (ContainerInterface $container) {
+    $action = $container->get(CreateTaskAction::class);
+    return new CreateTaskController($action);
+});
+
 AppFactory::setContainer($container);
 
 $app = AppFactory::create();
@@ -69,6 +76,7 @@ $app->get('/', function (ServerRequestInterface $request, ResponseInterface $res
 
 $app->get('/tasks', ListTaskController::class);
 $app->get('/tasks/{id}', ViewTaskController::class);
+$app->post('/tasks/{id}', CreateTaskController::class);
 
 $app->run();
 
