@@ -34,7 +34,7 @@ class TaskRepository implements TaskRepositoryInterface
     {
         $query = <<< SQL
 SELECT * from tasks
-where id = :task_id;
+where id = :task_id
 SQL;
 
         $stmt = $this->pdo->prepare($query);
