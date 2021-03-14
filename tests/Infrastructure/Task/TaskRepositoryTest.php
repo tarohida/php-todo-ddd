@@ -117,4 +117,13 @@ SQL;
 
         $this->assertInstanceOf(Task::class, $task_repository->find(10));
     }
+
+    public function test_method_delete()
+    {
+        $task_id = 1;
+        $task_repository = new TaskRepository($this->pdo);
+        $task_repository->delete($task_id);
+
+        $this->assertNull($task_repository->find(1));
+    }
 }

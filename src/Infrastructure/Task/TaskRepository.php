@@ -85,4 +85,16 @@ SQL;
         $pdo_statement->bindParam('title', $title, PDO::PARAM_STR);
         $pdo_statement->execute();
     }
+
+    public function delete(int $task_id): void
+    {
+        $query = <<< SQL
+DELETE from tasks
+where id = :id
+SQL;
+        $pdo_statement = $this->pdo->prepare($query);
+        $pdo_statement->bindParam(':id', $task_id, PDO::PARAM_INT);
+        $pdo_statement->execute();
+
+    }
 }

@@ -2,9 +2,11 @@
 declare(strict_types=1);
 
 use App\Application\Actions\Task\CreateTaskAction;
+use App\Application\Actions\Task\DeleteTaskAction;
 use App\Application\Actions\Task\ListTaskAction;
 use App\Application\Actions\Task\ViewTaskAction;
 use App\Application\Controller\Http\CreateTaskController;
+use App\Application\Controller\Http\DeleteTaskController;
 use App\Application\Controller\Http\ListTaskController;
 use App\Application\Controller\Http\ViewTaskController;
 use App\Domain\Task\TaskService;
@@ -55,6 +57,11 @@ $container->set(CreateTaskAction::class, function (ContainerInterface $container
     return new CreateTaskAction($repository, $service);
 });
 
+$container->set(DeleteTaskAction::class, function (ContainerInterface $container) {
+    $repository = $container->get(TaskRepository::class);
+    return new DeleteTaskAction($repository);
+});
+
 $container->set(ViewTaskController::class, function (ContainerInterface $container) {
     $action = $container->get(ViewTaskAction::class);
     return new ViewTaskController($action);
@@ -70,6 +77,11 @@ $container->set(CreateTaskController::class, function (ContainerInterface $conta
     return new CreateTaskController($action);
 });
 
+$container->set(DeleteTaskController::class, function (ContainerInterface $container) {
+    $action = $container->get(DeleteTaskAction::class);
+    return new DeleteTaskController($action);
+});
+
 AppFactory::setContainer($container);
 
 $app = AppFactory::create();
@@ -83,6 +95,7 @@ $app->get('/', function (ServerRequestInterface $request, ResponseInterface $res
 $app->get('/tasks', ListTaskController::class);
 $app->get('/tasks/{id}', ViewTaskController::class);
 $app->post('/tasks/{id}', CreateTaskController::class);
+$app->delete('/tasks/{id}', DeleteTaskController::class);
 
 $app->run();
 

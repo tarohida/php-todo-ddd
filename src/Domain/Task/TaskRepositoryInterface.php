@@ -11,4 +11,6 @@ interface TaskRepositoryInterface
     public function list(): ?TaskListInterface;
 
     public function save(TaskInterface $task): void;
+
+    public function delete(int $task_id): void;
 }
