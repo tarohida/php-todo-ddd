@@ -10,7 +10,7 @@ use App\Application\DTO\Task\TaskDataList;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Domain\Task\TaskServiceInterface;
 
-class ListTaskAction implements ActionInterface
+class ListTasksAction implements ActionInterface
 {
     /**
      * @var TaskRepositoryInterface
