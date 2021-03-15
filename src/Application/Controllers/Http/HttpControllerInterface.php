@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 
-namespace App\Application\Controller\Http;
+namespace App\Application\Controllers\Http;
 
 
 use Psr\Http\Message\ResponseInterface;
