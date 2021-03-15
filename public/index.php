@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 use App\Application\Actions\Task\CreateTaskAction;
 use App\Application\Actions\Task\DeleteTaskAction;
-use App\Application\Actions\Task\ListTaskAction;
+use App\Application\Actions\Task\ListTasksAction;
 use App\Application\Actions\Task\ViewTaskAction;
-use App\Application\Controller\Http\CreateTaskController;
-use App\Application\Controller\Http\DeleteTaskController;
-use App\Application\Controller\Http\ListTaskController;
-use App\Application\Controller\Http\ViewTaskController;
+use App\Application\Controllers\Http\CreateTaskController;
+use App\Application\Controllers\Http\DeleteTaskController;
+use App\Application\Controllers\Http\ListTasksController;
+use App\Application\Controllers\Http\ViewTaskController;
 use App\Domain\Task\TaskService;
 use App\Infrastructure\Task\TaskRepository;
 use DI\Container;
@@ -45,10 +45,10 @@ $container->set(ViewTaskAction::class, function (ContainerInterface $container) 
     return new ViewTaskAction($db, $service);
 });
 
-$container->set(ListTaskAction::class, function (ContainerInterface $container) {
+$container->set(ListTasksAction::class, function (ContainerInterface $container) {
     $repository = $container->get(TaskRepository::class);
     $service = $container->get(TaskService::class);
-    return new ListTaskAction($repository, $service);
+    return new ListTasksAction($repository, $service);
 });
 
 $container->set(CreateTaskAction::class, function (ContainerInterface $container) {
@@ -67,9 +67,9 @@ $container->set(ViewTaskController::class, function (ContainerInterface $contain
     return new ViewTaskController($action);
 });
 
-$container->set(ListTaskController::class, function (ContainerInterface $container) {
-    $action = $container->get(ListTaskAction::class);
-    return new ListTaskController($action);
+$container->set(ListTasksController::class, function (ContainerInterface $container) {
+    $action = $container->get(ListTasksAction::class);
+    return new ListTasksController($action);
 });
 
 $container->set(CreateTaskController::class, function (ContainerInterface $container) {
@@ -92,7 +92,7 @@ $app->get('/', function (ServerRequestInterface $request, ResponseInterface $res
     return $response;
 });
 
-$app->get('/tasks', ListTaskController::class);
+$app->get('/tasks', ListTasksController::class);
 $app->get('/tasks/{id}', ViewTaskController::class);
 $app->post('/tasks/{id}', CreateTaskController::class);
 $app->delete('/tasks/{id}', DeleteTaskController::class);
