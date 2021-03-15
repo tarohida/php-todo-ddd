@@ -9,6 +9,7 @@ use App\Application\Actions\Task\ViewTaskAction;
 use App\Application\Exception\HttpNotFoundException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Slim\Exception\HttpBadRequestException;
 
 class ViewTaskController implements HttpControllerInterface
 {
@@ -26,10 +27,20 @@ class ViewTaskController implements HttpControllerInterface
         $this->action = $action;
     }
 
+    /**
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @param array $args
+     * @return ResponseInterface
+     * @throws HttpBadRequestException
+     */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         try {
-            $id = (int)$args['id'];
+            $id = filter_var($args['id'], FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+            if ($id === false) {
+                throw new HttpBadRequestException($request);
+            }
             $task_data = $this->action->action($id);
             $content = sprintf("id:%s title:%s", $task_data->id(), $task_data->title());
             $response->getBody()->write($content);
