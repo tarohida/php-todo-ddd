@@ -33,7 +33,7 @@ class ListTaskController implements HttpControllerInterface
         foreach ($tasks as $task) {
             $task_id = $task->id();
             $task_title = $task->title();
-            $stream->write(sprintf("id: %s; title: %s", $task_id, $task_title));
+            $stream->write(sprintf("id: %s; title: %s %s", $task_id, $task_title, '<br>'));
         }
         return $response;
     }
