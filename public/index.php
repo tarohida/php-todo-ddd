@@ -6,6 +6,7 @@ use App\Application\Actions\Task\DeleteTaskAction;
 use App\Application\Actions\Task\ListTasksAction;
 use App\Application\Actions\Task\ViewTaskAction;
 use App\Application\Controllers\Http\CreateTaskController;
+use App\Application\Controllers\Http\CreateTaskFormController;
 use App\Application\Controllers\Http\DeleteTaskController;
 use App\Application\Controllers\Http\ListTasksController;
 use App\Application\Controllers\Http\ViewTaskController;
@@ -77,6 +78,10 @@ $container->set(CreateTaskController::class, function (ContainerInterface $conta
     return new CreateTaskController($action);
 });
 
+$container->set(CreateTaskFormController::class, function () {
+    return new CreateTaskFormController();
+});
+
 $container->set(DeleteTaskController::class, function (ContainerInterface $container) {
     $action = $container->get(DeleteTaskAction::class);
     return new DeleteTaskController($action);
@@ -93,6 +98,7 @@ $app->get('/', function (ServerRequestInterface $request, ResponseInterface $res
 });
 
 $app->get('/tasks', ListTasksController::class);
+$app->get('/tasks/create', CreateTaskFormController::class);
 $app->get('/tasks/{id}', ViewTaskController::class);
 $app->post('/tasks/{id}', CreateTaskController::class);
 $app->delete('/tasks/{id}', DeleteTaskController::class);
