@@ -13,11 +13,11 @@ class DeleteTaskFormController implements HttpControllerInterface
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         $view = <<< HTML
-<button type="button" onclick="deleteTask()">Delete task</button>
-<p id="content"></p>
 <form>
-    <input type="text" id="task_id" />
+    Task id: <input type="text" id="task_id" />
 </form>
+<p id="content"></p>
+<button type="button" onclick="deleteTask()">Delete task</button>
 
 <script>
 function deleteTask() {
