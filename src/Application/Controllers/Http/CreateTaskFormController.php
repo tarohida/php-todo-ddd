@@ -13,10 +13,26 @@ class CreateTaskFormController implements HttpControllerInterface
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         $view = <<< HTML
-<form action="/tasks/1" method="post">
-<input type="text" name="title">
-<input type="submit">
+<form>
+    Task id: <input type="text" id="task_id" /><br>
+    Task title: <input type="text" id="task_title" /><br>
 </form>
+<p id="content"></p>
+<button type="button" onclick="createTask()">Create task</button>
+<script>
+function createTask() {
+  const id = document.getElementById("task_id").value;
+  const title = document.getElementById("task_title").value;
+  const xml_http = new XMLHttpRequest();
+  xml_http.onreadystatechange = function() {
+    document.getElementById("content").innerHTML = this.responseText;
+  };
+  xml_http.open("POST", "/tasks/" + id, true);
+  const form_data = new FormData();
+  form_data.append('title', title);
+  xml_http.send(form_data);
+}
+</script>
 HTML;
 
         $response->getBody()->write($view);
