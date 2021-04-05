@@ -14,9 +14,12 @@ use App\Application\Controllers\Http\ViewTaskController;
 use App\Domain\Task\TaskService;
 use App\Infrastructure\Task\TaskRepository;
 use DI\Container;
+use eftec\bladeone\BladeOne;
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
 use Slim\Factory\AppFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -34,6 +37,22 @@ $container->set(TaskRepository::class, function () {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
     return new TaskRepository($pdo);
+});
+
+$container->set(BladeOne::class, function (){
+    $views = __DIR__ . '/../views';
+    $cache = __DIR__ . '/../cache';
+    return new BladeOne($views, $cache, BladeOne::MODE_AUTO);
+});
+
+$container->set(LoggerInterface::class, function () {
+    $formatter = new LineFormatter();
+    $formatter->includeStacktraces(true);
+    $handler = new StreamHandler('php://stdout', Logger::DEBUG);
+    $handler->setFormatter($formatter);
+    $logger = new Logger('php-todo-app');
+    $logger->pushHandler($handler);
+    return $logger;
 });
 
 $container->set(TaskService::class, function (ContainerInterface $container) {
@@ -79,12 +98,16 @@ $container->set(CreateTaskController::class, function (ContainerInterface $conta
     return new CreateTaskController($action);
 });
 
-$container->set(CreateTaskFormController::class, function () {
-    return new CreateTaskFormController();
+$container->set(CreateTaskFormController::class, function (ContainerInterface $container) {
+    $blade = $container->get(BladeOne::class);
+    $logger = $container->get(LoggerInterface::class);
+    return new CreateTaskFormController($blade, $logger);
 });
 
-$container->set(DeleteTaskFormController::class, function () {
-    return new DeleteTaskFormController();
+$container->set(DeleteTaskFormController::class, function (ContainerInterface $container) {
+    $view = $container->get(BladeOne::class);
+    $logger = $container->get(LoggerInterface::class);
+    return new DeleteTaskFormController($view, $logger);
 });
 
 $container->set(DeleteTaskController::class, function (ContainerInterface $container) {
@@ -96,12 +119,7 @@ AppFactory::setContainer($container);
 
 $app = AppFactory::create();
 
-$app->get('/', function (ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
-{
-    $response->getBody()->write('Hello World');
-    return $response;
-});
-
+$app->redirect('/', '/tasks');
 $app->get('/tasks', ListTasksController::class);
 $app->get('/tasks/create', CreateTaskFormController::class);
 $app->get('/tasks/delete', DeleteTaskFormController::class);
