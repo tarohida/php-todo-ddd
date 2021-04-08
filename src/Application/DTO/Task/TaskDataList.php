@@ -4,9 +4,7 @@
 namespace App\Application\DTO\Task;
 
 
-use Iterator;
-
-class TaskDataList implements Iterator
+class TaskDataList implements TaskDataListInterface
 {
     private array $task_data_array;
     private int $position;

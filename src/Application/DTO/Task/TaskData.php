@@ -6,7 +6,7 @@ namespace App\Application\DTO\Task;
 
 use App\Domain\Task\TaskInterface;
 
-class TaskData
+class TaskData implements TaskDataInterface
 {
     private int $id;
     private string $title;

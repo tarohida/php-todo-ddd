@@ -6,6 +6,7 @@ namespace App\Application\Actions\Task;
 
 use App\Application\DTO\Task\TaskData;
 use App\Application\DTO\Task\TaskDataList;
+use App\Application\DTO\Task\TaskDataListInterface;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Domain\Task\TaskServiceInterface;
 
@@ -31,7 +32,7 @@ class ListTasksAction implements ListTasksActionInterface
         $this->task_service = $task_service;
     }
 
-    public function action(): TaskDataList
+    public function action(): TaskDataListInterface
     {
         $task_list = $this->task_repository->list();
         $task_data_list = [];
