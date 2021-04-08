@@ -4,13 +4,12 @@
 namespace App\Application\Actions\Task;
 
 
-use App\Application\Actions\ActionInterface;
 use App\Application\DTO\Task\TaskData;
 use App\Application\DTO\Task\TaskDataList;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Domain\Task\TaskServiceInterface;
 
-class ListTasksAction implements ActionInterface
+class ListTasksAction implements ListTasksActionInterface
 {
     /**
      * @var TaskRepositoryInterface

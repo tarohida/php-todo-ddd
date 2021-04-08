@@ -11,7 +11,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Exception\HttpBadRequestException;
 
-class ViewTaskController implements HttpControllerInterface
+class ViewTaskController implements ViewTaskControllerInterface
 {
     /**
      * @var ViewTaskAction

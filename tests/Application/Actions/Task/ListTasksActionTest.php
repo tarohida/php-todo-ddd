@@ -4,8 +4,8 @@
 namespace Tests\Application\Actions\Task;
 
 
-use App\Application\Actions\ActionInterface;
 use App\Application\Actions\Task\ListTasksAction;
+use App\Application\Actions\Task\ListTasksActionInterface;
 use App\Application\DTO\Task\TaskDataList;
 use App\Domain\Task\Task;
 use App\Domain\Task\TaskList;
@@ -32,7 +32,7 @@ class ListTasksActionTest extends TestCase
 
     public function test_implements_ActionInterface()
     {
-        $this->assertInstanceOf(ActionInterface::class, new ListTasksAction($this->task_repository, $this->task_service));
+        $this->assertInstanceOf(ListTasksActionInterface::class, new ListTasksAction($this->task_repository, $this->task_service));
     }
 
     public function test_action()

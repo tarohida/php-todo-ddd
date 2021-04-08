@@ -10,7 +10,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Exception\HttpBadRequestException;
 
-class DeleteTaskController implements HttpControllerInterface
+class DeleteTaskController implements DeleteTaskControllerInterface
 {
     /**
      * @var DeleteTaskActionInterface

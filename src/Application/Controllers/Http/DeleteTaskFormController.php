@@ -11,7 +11,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 
-class DeleteTaskFormController implements HttpControllerInterface
+class DeleteTaskFormController implements DeleteTaskFormControllerInterface
 {
     /**
      * @var BladeOne

@@ -11,7 +11,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 
-class CreateTaskFormController implements HttpControllerInterface
+class CreateTaskFormController implements CreateTaskFormControllerInterface
 {
     /**
      * @var BladeOne

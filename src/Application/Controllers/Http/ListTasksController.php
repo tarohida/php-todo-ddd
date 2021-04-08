@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace App\Application\Controllers\Http;
 
 
-use App\Application\Actions\Task\ListTasksAction;
+use App\Application\Actions\Task\ListTasksActionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class ListTasksController implements HttpControllerInterface
+class ListTasksController implements ListTasksControllerInterface
 {
     /**
-     * @var ListTasksAction
+     * @var ListTasksActionInterface
      */
-    private ListTasksAction $action;
+    private ListTasksActionInterface $action;
 
-    public function __construct(ListTasksAction $action)
+    public function __construct(ListTasksActionInterface $action)
     {
         $this->action = $action;
     }

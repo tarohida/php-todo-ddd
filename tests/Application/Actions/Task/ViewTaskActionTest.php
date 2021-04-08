@@ -4,8 +4,8 @@
 namespace Tests\Application\Actions\Task;
 
 
-use App\Application\Actions\ActionInterface;
 use App\Application\Actions\Task\ViewTaskAction;
+use App\Application\Actions\Task\ViewTaskActionInterface;
 use App\Application\DTO\Task\TaskData;
 use App\Domain\Task\Task;
 use App\Domain\Task\TaskRepositoryInterface;
@@ -41,7 +41,7 @@ class ViewTaskActionTest extends TestCase
 
     public function test_implements_ActionInterface()
     {
-        $this->assertInstanceOf(ActionInterface::class, new ViewTaskAction($this->task_repository, $this->task_service));
+        $this->assertInstanceOf(ViewTaskActionInterface::class, new ViewTaskAction($this->task_repository, $this->task_service));
     }
 
     public function test_method_action()
