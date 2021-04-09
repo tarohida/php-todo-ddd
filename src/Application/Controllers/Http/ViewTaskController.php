@@ -6,7 +6,7 @@ namespace App\Application\Controllers\Http;
 
 
 use App\Application\Actions\Task\ViewTaskAction;
-use App\Application\Exception\HttpNotFoundException;
+use App\Exeption\Application\Actions\Task\SpecifiedTaskNotFoundException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Exception\HttpBadRequestException;
@@ -45,8 +45,8 @@ class ViewTaskController implements ViewTaskControllerInterface
             $content = sprintf("id:%s title:%s", $task_data->id(), $task_data->title());
             $response->getBody()->write($content);
             return $response;
-        } catch (HttpNotFoundException $e) {
-            $response->getBody()->write($e->getMessage());
+        } catch (SpecifiedTaskNotFoundException $e) {
+            $response->getBody()->write(sprintf('Specified task not found: %s', $e->getTaskId()));
             return $response->withStatus(404);
         }
     }

@@ -5,9 +5,9 @@ namespace App\Application\Actions\Task;
 
 
 use App\Application\DTO\Task\TaskData;
-use App\Application\Exception\HttpNotFoundException;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Domain\Task\TaskServiceInterface;
+use App\Exeption\Application\Actions\Task\SpecifiedTaskNotFoundException;
 
 class ViewTaskAction implements ViewTaskActionInterface
 {
@@ -29,7 +29,9 @@ class ViewTaskAction implements ViewTaskActionInterface
     {
         $task = $this->task_repository->find($id);
         if (is_null($task)) {
-            throw new HttpNotFoundException("Specified Task Not Found." . PHP_EOL . "task id: ${id}");
+            $e = new SpecifiedTaskNotFoundException();
+            $e->setTaskId($id);
+            throw $e;
         }
         return new TaskData($task);
     }
