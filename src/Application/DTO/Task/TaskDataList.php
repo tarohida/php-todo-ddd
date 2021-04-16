@@ -22,12 +22,12 @@ class TaskDataList implements TaskDataListInterface
         }
     }
 
-    private function add(TaskData $task_data)
+    private function add(TaskDataInterface $task_data)
     {
         $this->task_data_array[] = $task_data;
     }
 
-    public function current(): TaskData
+    public function current(): TaskDataInterface
     {
         return $this->task_data_array[$this->position];
     }

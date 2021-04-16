@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Controllers\Http;
 
 
-use App\Application\Actions\Task\ViewTaskAction;
+use App\Application\Actions\Task\ViewTaskActionInterface;
 use App\Exeption\Application\Actions\Task\SpecifiedTaskNotFoundException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -14,15 +14,15 @@ use Slim\Exception\HttpBadRequestException;
 class ViewTaskController implements ViewTaskControllerInterface
 {
     /**
-     * @var ViewTaskAction
+     * @var ViewTaskActionInterface
      */
-    private ViewTaskAction $action;
+    private ViewTaskActionInterface $action;
 
     /**
      * ViewTaskController constructor.
-     * @param ViewTaskAction $action
+     * @param ViewTaskActionInterface $action
      */
-    public function __construct(ViewTaskAction $action)
+    public function __construct(ViewTaskActionInterface $action)
     {
         $this->action = $action;
     }

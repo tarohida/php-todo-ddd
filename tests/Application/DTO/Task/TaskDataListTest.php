@@ -4,7 +4,7 @@
 namespace Tests\Application\DTO\Task;
 
 
-use App\Application\DTO\Task\TaskData;
+use App\Application\DTO\Task\TaskDataInterface;
 use App\Application\DTO\Task\TaskDataList;
 use Iterator;
 use PHPUnit\Framework\TestCase;
@@ -17,8 +17,8 @@ class TaskDataListTest extends TestCase
     public function setUp(): void
     {
         $this->task_data_list = [
-            $this->createStub(TaskData::class),
-            $this->createStub(TaskData::class)
+            $this->createStub(TaskDataInterface::class),
+            $this->createStub(TaskDataInterface::class)
         ];
     }
 
@@ -32,7 +32,7 @@ class TaskDataListTest extends TestCase
     {
         $this->expectException(TypeError::class);
         $task_data_list = [
-            $this->createStub(TaskData::class),
+            $this->createStub(TaskDataInterface::class),
             []
         ];
         new TaskDataList($task_data_list);
@@ -48,7 +48,7 @@ class TaskDataListTest extends TestCase
         $task_data_list = new TaskDataList($this->task_data_list);
 
         foreach ($task_data_list as $task_data) {
-            $this->assertInstanceOf(TaskData::class, $task_data);
+            $this->assertInstanceOf(TaskDataInterface::class, $task_data);
         }
     }
 
@@ -56,6 +56,5 @@ class TaskDataListTest extends TestCase
     {
         $task_data_list = new TaskDataList([]);
         $this->assertTrue($task_data_list->isEmpty());
-
     }
 }
