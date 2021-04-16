@@ -10,7 +10,7 @@ use App\Domain\Task\TaskInterface;
 use App\Domain\Task\TaskList;
 use App\Domain\Task\TaskListInterface;
 use App\Domain\Task\TaskRepositoryInterface;
-use App\Infrastructure\Task\Exception\DuplicatedTaskException;
+use App\Exeption\Infrastructure\Task\DuplicatedTaskException;
 use UnexpectedValueException;
 use PDO;
 
