@@ -101,7 +101,7 @@ SQL;
         $this->assertCount(2, $task_list);
     }
 
-    public function test_method_list__return_empty_task_list()
+    public function test_method_list_return_empty_task_list()
     {
         $this->delete_all_tasks();
         $task_repository = new TaskRepository($this->pdo);

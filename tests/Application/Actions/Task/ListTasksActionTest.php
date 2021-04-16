@@ -30,7 +30,7 @@ class ListTasksActionTest extends TestCase
         $this->assertInstanceOf(ListTasksAction::class, new ListTasksAction($this->task_repository, $this->task_service));
     }
 
-    public function test_implements_ActionInterface()
+    public function test_implements_ListTaskActionInterface()
     {
         $this->assertInstanceOf(ListTasksActionInterface::class, new ListTasksAction($this->task_repository, $this->task_service));
     }
