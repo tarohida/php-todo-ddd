@@ -5,8 +5,6 @@ namespace App\Domain\Task;
 
 interface TaskServiceInterface
 {
-    public function __construct(TaskRepositoryInterface $repository);
-
     /**
      * @param TaskInterface $task
      * @return bool
