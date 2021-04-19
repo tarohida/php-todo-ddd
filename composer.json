@@ -1,0 +1,15 @@
+{
+    "name": "tarohida/php-todo-app",
+    "description": "php todo app",
+    "type": "project",
+    "license": "AGPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Taro Hida",
+            "email": "sk8trou@gmail.com"
+        }
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    }
+}
