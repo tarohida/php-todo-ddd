@@ -71,3 +71,16 @@ Time: 00:00.021, Memory: 4.00 MB
 
 OK (2 tests, 2 assertions)
 ```
+
+## add packages
+
+```
+docker-compose run --rm composer dump-autoload
+docker-compose run --rm composer require slim/slim
+docker-compose run --rm composer require monolog/monolog
+docker-compose run --rm composer require robmorgan/phinx
+docker-compose run --rm composer require eftec/bladeone
+docker-compose run --rm composer require ext-pdo
+docker-compose run --rm composer require slim/psr7
+docker-compose run --rm composer require php-di/php-di 
+```
