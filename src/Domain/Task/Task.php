@@ -13,8 +13,8 @@ class Task implements TaskInterface
      * @param string $title
      */
     public function __construct(
-        public int $id,
-        public string $title
+        private int $id,
+        private string $title
     ) {}
 
     public function id(): int
