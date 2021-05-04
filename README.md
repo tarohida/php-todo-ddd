@@ -84,3 +84,13 @@ docker-compose run --rm composer require ext-pdo
 docker-compose run --rm composer require slim/psr7
 docker-compose run --rm composer require php-di/php-di 
 ```
+
+## initialize Phinx
+
+```
+$ mkdir -p db/migrations
+$ docker-compose exec php ./vendor/bin/phinx init
+Phinx by CakePHP - https://phinx.org.
+
+created /var/www/html/phinx.php
+```
