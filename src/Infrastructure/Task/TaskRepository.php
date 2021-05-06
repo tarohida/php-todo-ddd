@@ -10,10 +10,15 @@ use App\Domain\Task\Task;
 use App\Domain\Task\TaskInterface;
 use App\Domain\Task\TaskIteratorInterface;
 use App\Domain\Task\TaskRepositoryInterface;
+use App\Infrastructure\RepositoryBase;
 use PDO;
 use Tests\Infrastructure\Exception\RuntimeException\PdoReturnUnexpectedValueException;
 
-class TaskRepository implements TaskRepositoryInterface
+/**
+ * Class TaskRepository
+ * @package App\Infrastructure\Task
+ */
+class TaskRepository extends RepositoryBase implements TaskRepositoryInterface
 {
     public function __construct(
         private PDO $pdo
@@ -54,12 +59,18 @@ SQL;
         // TODO: Implement list() method.
     }
 
-    public function save(TaskInterface $task)
+    /**
+     * @param TaskInterface $task
+     */
+    public function save(TaskInterface $task): void
     {
         // TODO: Implement save() method.
     }
 
-    public function delete(int $task_id)
+    /**
+     * @param int $task_id
+     */
+    public function delete(int $task_id): void
     {
         // TODO: Implement delete() method.
     }
