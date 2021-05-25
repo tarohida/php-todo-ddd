@@ -2,12 +2,12 @@
 declare(strict_types=1);
 
 
-namespace App\Application\Validator\ViolateParam;
+namespace App\Application\Validation\ViolateParam;
 
 
 /**
  * Interface ViolateParamInterface
- * @package App\Application\Validator\ViolateParam
+ * @package App\Application\Validation\ViolateParam
  */
 interface ViolateParamInterface
 {

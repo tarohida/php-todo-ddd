@@ -7,6 +7,7 @@ namespace App\Application\Action;
 
 use App\Application\Action\Exception\TaskAlreadyExistsException\TaskAlreadyExistsException;
 use App\Application\Command\Task\TaskCreateCommandInterface;
+use App\Domain\Task\Exception\TaskValidateException;
 use App\Domain\Task\Task;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Domain\Task\TaskServiceInterface;
@@ -29,17 +30,18 @@ class TaskCreateAction implements TaskCreateActionInterface
     /**
      * @param TaskCreateCommandInterface $command
      * @throws TaskAlreadyExistsException
+     * @throws TaskValidateException
      */
-    public function create(TaskCreateCommandInterface $command)
+    public function create(TaskCreateCommandInterface $command): void
     {
+        $id = $command->id();
+        $title = $command->title();
+        $task = new Task($id, $title);
         try {
-            $id = $command->id();
-            $title = $command->title();
             $this->repository->beginTransaction();
             if ($this->task_service->taskExists($id)) {
                 throw new TaskAlreadyExistsException($id);
             }
-            $task = new Task($id, $title);
             $this->repository->save($task);
             $this->repository->commit();
         } catch (PDOException $ex) {

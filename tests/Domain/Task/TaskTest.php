@@ -3,31 +3,69 @@ declare(strict_types=1);
 
 namespace Tests\Domain\Task;
 
+use App\Domain\Task\Exception\TaskValidateException;
 use App\Domain\Task\Task;
 use App\Domain\Task\TaskInterface;
 use PHPUnit\Framework\TestCase;
-use TypeError;
 
+/**
+ * Class TaskTest
+ * @package Tests\Domain\Task
+ */
 class TaskTest extends TestCase
 {
     private Task $task;
     private int $id;
     private string $title;
 
-    public function setUp(): void
+    public function validParamsProvider(): array
     {
+        return [
+            [10000000, 'title1'],
+            [1, '1'],
+            [1, '☔']
+        ];
+    }
+
+    public function notValidParamsProvider(): array
+    {
+        return [
+            [0, 'title1'],
+            [-1, 'title'],
+            [1, '']
+        ];
+    }
+
+    /**
+     * @throws TaskValidateException
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
         $this->id = 1;
         $this->title = 'title1';
         $this->task = new Task($this->id, $this->title);
     }
 
     /**
-     * @dataProvider invalid_construct_param_provider
-     * @noinspection PhpExpressionResultUnusedInspection
+     * @dataProvider validParamsProvider
+     * @param $id
+     * @param $title
+     * @throws TaskValidateException
      */
-    public function test_construct_params_must_not_be_null($id, $title)
+    public function test_construct($id, $title)
     {
-        $this->expectException(TypeError::class);
+        $this->assertInstanceOf(Task::class, new Task($id, $title));
+    }
+
+    /**
+     * @dataProvider notValidParamsProvider
+     * @param $id
+     * @param $title
+     */
+    public function test_construct_throw_TaskValidateException($id, $title)
+    {
+        $this->expectException(TaskValidateException::class);
         new Task($id, $title);
     }
 
