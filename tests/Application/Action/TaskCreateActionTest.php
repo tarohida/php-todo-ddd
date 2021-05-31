@@ -7,6 +7,7 @@ use App\Application\Action\Exception\TaskAlreadyExistsException\TaskAlreadyExist
 use App\Application\Action\TaskCreateAction;
 use App\Application\Action\TaskCreateActionInterface;
 use App\Application\Command\Task\TaskCreateCommandInterface;
+use App\Domain\Task\Exception\TaskValidateException;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Domain\Task\TaskServiceInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -39,7 +40,7 @@ class TaskCreateActionTest extends TestCase
     }
 
     /**
-     * @throws TaskAlreadyExistsException
+     * @throws TaskAlreadyExistsException|TaskValidateException
      */
     public function test_method_create()
     {
@@ -55,6 +56,9 @@ class TaskCreateActionTest extends TestCase
         $action->create($this->command);
     }
 
+    /**
+     * @throws TaskValidateException
+     */
     public function test_method_create_throw_TaskAlreadyExistsException()
     {
         $this->task_service->method('taskExists')
@@ -62,6 +66,8 @@ class TaskCreateActionTest extends TestCase
         $action = new TaskCreateAction($this->repository, $this->task_service);
         $this->command->method('id')
             ->willReturn(1);
+        $this->command->method('title')
+            ->willReturn('title1');
         try {
             $action->create($this->command);
         } catch (TaskAlreadyExistsException $ex) {
