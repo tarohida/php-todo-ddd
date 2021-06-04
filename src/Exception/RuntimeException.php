@@ -18,6 +18,6 @@ abstract class RuntimeException extends \RuntimeException implements TodoAppExce
      *
      * @return string
      */
-    abstract function getLoggingMessage(): string;
+    abstract public function getLoggingMessage(): string;
 
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Task;
 
 
+use App\Domain\Task\Exception\SpecifiedTaskNotFoundException;
 use App\Infrastructure\RepositoryBaseInterface;
 
 /**
@@ -13,6 +14,11 @@ use App\Infrastructure\RepositoryBaseInterface;
  */
 interface TaskRepositoryInterface extends RepositoryBaseInterface
 {
+    /**
+     * @param int $task_id
+     * @return TaskInterface
+     * @throws SpecifiedTaskNotFoundException
+     */
     public function find(int $task_id): TaskInterface;
     public function list(): TaskIteratorInterface;
 

@@ -5,24 +5,38 @@ declare(strict_types=1);
 namespace Tests\Infrastructure\Task;
 
 use App\Domain\Task\Exception\SpecifiedTaskNotFoundException;
+use App\Domain\Task\Exception\TaskValidateException;
 use App\Domain\Task\TaskInterface;
 use App\Domain\Task\TaskRepositoryInterface;
+use App\Infrastructure\Pdo\Exception\NotAffectedException;
+use App\Infrastructure\Pdo\Exception\TooAffectedException;
 use App\Infrastructure\Task\TaskRepository;
 use PDO;
 use PDOStatement;
+use PHPUnit\Framework\MockObject\Stub;
 use Tests\Infrastructure\DatabaseTestCase;
 use Tests\Infrastructure\Exception\RuntimeException\PdoReturnUnexpectedValueException;
 
+/**
+ * Class TaskRepositoryTest
+ * @package Tests\Infrastructure\Task
+ */
 class TaskRepositoryTest extends DatabaseTestCase
 {
     private PDO $pdo;
     private TaskRepository $repository;
+    private PDOStatement|Stub $pdo_statement;
+    private Stub|PDO $pdo_mock;
+    private TaskInterface|Stub $task;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         $this->pdo = $this->getPdo();
+        $this->pdo_mock = $this->createStub(PDO::class);
         $this->repository = new TaskRepository($this->pdo);
+        $this->pdo_statement = $this->createStub(PDOStatement::class);
+        $this->task = $this->createStub(TaskInterface::class);
         $this->clean();
         $this->seed();
     }
@@ -60,7 +74,7 @@ SQL;
     }
 
     /**
-     * @throws SpecifiedTaskNotFoundException
+     * @throws SpecifiedTaskNotFoundException|TaskValidateException
      */
     public function test_method_find()
     {
@@ -70,6 +84,9 @@ SQL;
         $this->assertSame('title1', $task->title());
     }
 
+    /**
+     * @throws TaskValidateException
+     */
     public function test_method_find_throw_SpecifiedTaskNotFoundException()
     {
         try {
@@ -105,13 +122,11 @@ Array
 
 EOF;
 
-        $pdo_statement = $this->createStub(PDOStatement::class);
-        $pdo_statement->method('fetchAll')
+        $this->pdo_statement->method('fetchAll')
             ->willReturn($array);
-        $pdo = $this->createStub(PDO::class);
-        $pdo->method('prepare')
-            ->willReturn($pdo_statement);
-        $repository = new TaskRepository($pdo);
+        $this->pdo_mock->method('prepare')
+            ->willReturn($this->pdo_statement);
+        $repository = new TaskRepository($this->pdo_mock);
         try {
             $repository->find(1);
         } catch (PdoReturnUnexpectedValueException $ex) {
@@ -140,13 +155,11 @@ Array
 
 EOF;
 
-        $pdo_statement = $this->createStub(PDOStatement::class);
-        $pdo_statement->method('fetchAll')
+        $this->pdo_statement->method('fetchAll')
             ->willReturn($array);
-        $pdo = $this->createStub(PDO::class);
-        $pdo->method('prepare')
-            ->willReturn($pdo_statement);
-        $repository = new TaskRepository($pdo);
+        $this->pdo_mock->method('prepare')
+            ->willReturn($this->pdo_statement);
+        $repository = new TaskRepository($this->pdo_mock);
         try {
             $repository->find(1);
         } catch (PdoReturnUnexpectedValueException $ex) {
@@ -175,13 +188,11 @@ Array
 
 EOF;
 
-        $pdo_statement = $this->createStub(PDOStatement::class);
-        $pdo_statement->method('fetchAll')
+        $this->pdo_statement->method('fetchAll')
             ->willReturn($array);
-        $pdo = $this->createStub(PDO::class);
-        $pdo->method('prepare')
-            ->willReturn($pdo_statement);
-        $repository = new TaskRepository($pdo);
+        $this->pdo_mock->method('prepare')
+            ->willReturn($this->pdo_statement);
+        $repository = new TaskRepository($this->pdo_mock);
         try {
             $repository->find(1);
         } catch (PdoReturnUnexpectedValueException $ex) {
@@ -190,7 +201,63 @@ EOF;
             $this->assertSame($logging_message, $ex->getLoggingMessage());
         }
     }
-    public function tearDown(): void
+
+    /**
+     * @throws TaskValidateException
+     * @throws SpecifiedTaskNotFoundException
+     */
+    public function test_method_save()
+    {
+        $this->clean();
+        $this->task = $this->createStub(TaskInterface::class);
+        $this->task->method('id')
+            ->willReturn(1);
+        $this->task->method('title')
+            ->willReturn('title1');
+        $this->repository->save($this->task);
+        $ret = $this->repository->find(1);
+        $this->assertSame(1, $ret->id());
+    }
+
+    public function test_method_save_if_affected_row_equal_to_0_throw_NotAffectedException()
+    {
+        $this->task->method('id')
+            ->willReturn(1);
+        $this->task->method('title')
+            ->willReturn('title1');
+        $this->pdo_statement->method('rowCount')
+            ->willReturn(0);
+        $this->pdo_mock->method('prepare')
+            ->willReturn($this->pdo_statement);
+        $repository = new TaskRepository($this->pdo_mock);
+        try {
+            $repository->save($this->task);
+            $this->fail('please raise exception');
+        } catch (NotAffectedException $ex) {
+            $this->assertTrue(!empty($ex->getLoggingMessage()));
+        }
+    }
+
+    public function test_method_save_if_affected_row_not_1_throwTooAffectedException()
+    {
+        $this->task->method('id')
+            ->willReturn(1);
+        $this->task->method('title')
+            ->willReturn('title1');
+        $this->pdo_statement->method('rowCount')
+            ->willReturn(3);
+        $this->pdo_mock->method('prepare')
+            ->willReturn($this->pdo_statement);
+        $repository = new TaskRepository($this->pdo_mock);
+        try {
+            $repository->save($this->task);
+            $this->fail('please raise exception');
+        } catch (TooAffectedException $ex) {
+            $this->assertTrue(!empty($ex->getLoggingMessage()));
+        }
+    }
+
+    protected function tearDown(): void
     {
         parent::tearDown();
         unset($this->repository);

@@ -13,7 +13,7 @@ use PDO;
  */
 abstract class RepositoryBase implements RepositoryBaseInterface
 {
-    private PDO $pdo;
+    protected PDO $pdo;
 
     public function beginTransaction(): void
     {

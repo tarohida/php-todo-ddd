@@ -99,8 +99,11 @@ class TaskCreateControllerTest extends TestCase
     public function test_method_invoke_if_raise_TaskAlreadyException_throw_ConflictApiProblem()
     {
         $expected = [
-            'name' => 'id',
-            'value' => 1
+            'conflicted' =>
+                [
+                    'name' => 'id',
+                    'value' => 1
+                ]
         ];
         $ex = new TaskAlreadyExistsException(1);
         $this->request->method('getParsedBody')

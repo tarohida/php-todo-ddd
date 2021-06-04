@@ -6,10 +6,14 @@ namespace App\Infrastructure\Task;
 
 
 use App\Domain\Task\Exception\SpecifiedTaskNotFoundException;
+use App\Domain\Task\Exception\TaskValidateException;
 use App\Domain\Task\Task;
 use App\Domain\Task\TaskInterface;
 use App\Domain\Task\TaskIteratorInterface;
 use App\Domain\Task\TaskRepositoryInterface;
+use App\Exception\LogicException;
+use App\Infrastructure\Pdo\Exception\NotAffectedException;
+use App\Infrastructure\Pdo\Exception\TooAffectedException;
 use App\Infrastructure\RepositoryBase;
 use PDO;
 use Tests\Infrastructure\Exception\RuntimeException\PdoReturnUnexpectedValueException;
@@ -21,11 +25,11 @@ use Tests\Infrastructure\Exception\RuntimeException\PdoReturnUnexpectedValueExce
 class TaskRepository extends RepositoryBase implements TaskRepositoryInterface
 {
     public function __construct(
-        private PDO $pdo
+        protected PDO $pdo
     ) {}
 
     /**
-     * @throws SpecifiedTaskNotFoundException
+     * @throws SpecifiedTaskNotFoundException|TaskValidateException
      */
     public function find(int $task_id): TaskInterface
     {
@@ -56,7 +60,7 @@ SQL;
 
     public function list(): TaskIteratorInterface
     {
-        // TODO: Implement list() method.
+        throw new LogicException();
     }
 
     /**
@@ -64,7 +68,22 @@ SQL;
      */
     public function save(TaskInterface $task): void
     {
-        // TODO: Implement save() method.
+        $sql = <<<'SQL'
+insert into tasks
+(id, title) values 
+(:id, :title)
+SQL;
+        $statement = $this->pdo->prepare($sql);
+        $statement->bindValue(':id', $task->id());
+        $statement->bindValue(':title', $task->title());
+        $statement->execute();
+        $affected_row_count = $statement->rowCount();
+        if ($affected_row_count === 0) {
+            throw new NotAffectedException([$task->id(), $task->title()]);
+        }
+        if ($affected_row_count !== 1) {
+            throw new TooAffectedException([$task->id(), $task->title()], $affected_row_count);
+        }
     }
 
     /**
@@ -72,6 +91,6 @@ SQL;
      */
     public function delete(int $task_id): void
     {
-        // TODO: Implement delete() method.
+        throw new LogicException();
     }
 }

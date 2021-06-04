@@ -52,16 +52,15 @@ class TaskCreateController implements TaskCreateControllerInterface
         }
         if (!is_numeric($args['id'])) {
             $extensions = [
-                'invalid-params' => [
-                    [
-                        'name' => 'id',
-                        'reason' => 'must be numeric'
-                    ]
-                ]
+                'name' => 'id',
+                'reason' => 'must be numeric'
             ];
-            throw new ValidationApiProblem('idの値は数値である必要があります', $extensions);
+            throw new ValidationApiProblem(
+                'idの値は数値である必要があります',
+                ['invalid-params' => $extensions]
+            );
         }
-        $command = new TaskCreateCommand((int)$args['id'], $args['title']);
+        $command = new TaskCreateCommand((int)$args['id'], $parameter['title']);
         try {
             $this->action->create($command);
         } catch (TaskAlreadyExistsException $e) {
@@ -69,7 +68,10 @@ class TaskCreateController implements TaskCreateControllerInterface
                 'name' => 'id',
                 'value' => $e->getTaskId()
             ];
-            throw new ConflictApiProblem('該当のタスクはすでに存在します。', $extensions);
+            throw new ConflictApiProblem(
+                '該当のタスクはすでに存在します。',
+                ['conflicted' => $extensions]
+            );
         } catch (TaskValidateException $e) {
             $invalid_params = [];
             foreach ($e->getViolateParams() as $violateParam) {
@@ -78,9 +80,17 @@ class TaskCreateController implements TaskCreateControllerInterface
                 $invalid_param['reason'] = $violateParam->getReason();
                 $invalid_params[] = $invalid_param;
             }
-            throw new ValidationApiProblem('Taskのパラメタが不正です', ['invalid-params' => $invalid_params]);
+            throw new ValidationApiProblem(
+                'Taskのパラメタが不正です',
+                ['invalid-params' => $invalid_params]
+            );
         }
-        $response->getBody()->write('task created');
+        $return_params = [
+            'id' => $command->id(),
+            'title' => $command->title()
+        ];
+        $payload = json_encode($return_params, JSON_PRETTY_PRINT);
+        $response->getBody()->write($payload);
         return $response->withStatus(200);
     }
 }

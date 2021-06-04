@@ -6,14 +6,18 @@ namespace Tests\Infrastructure;
 use PDO;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Class DatabaseTestCase
+ * @package Tests\Infrastructure
+ */
 class DatabaseTestCase extends TestCase
 {
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
     }
 
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         parent::tearDown();
     }
