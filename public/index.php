@@ -12,9 +12,13 @@ use App\Domain\Task\TaskService;
 use App\Domain\Task\TaskServiceInterface;
 use App\Infrastructure\Task\TaskRepository;
 use DI\Container;
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Log\LoggerInterface;
 use Slim\Factory\AppFactory;
 use Slim\Factory\ServerRequestCreatorFactory;
 
@@ -49,8 +53,21 @@ $container->set(TaskCreateControllerInterface::class, function (ContainerInterfa
     return new TaskCreateController($action);
 });
 
+$container->set(LoggerInterface::class, function () {
+    $formatter = new LineFormatter();
+    $formatter->includeStacktraces(true);
+    $handler = new StreamHandler('php://stdout', Logger::DEBUG);
+    $handler->setFormatter($formatter);
+    $logger = new Logger('php-todo-app');
+    $logger->pushHandler($handler);
+    return $logger;
+});
+
+$logger = $container->get(LoggerInterface::class);
+
 AppFactory::setContainer($container);
 $app = AppFactory::create();
+$app->addRoutingMiddleware();
 $app->redirect('/', 'tasks');
 $app->get('/tasks', function (Request $request, Response $response) {
     $response->getBody()->write('not implement');
@@ -67,7 +84,7 @@ $responseFactory = $app->getResponseFactory();
 $serverRequestCreator = ServerRequestCreatorFactory::create();
 $request = $serverRequestCreator->createServerRequestFromGlobals();
 
-$errorHandler = new HttpErrorHandler($callableResolver, $responseFactory);
+$errorHandler = new HttpErrorHandler($callableResolver, $responseFactory, $logger);
 $shutdownHandler = new ShutdownHandler($request, $errorHandler, $displayErrorDetails);
 register_shutdown_function($shutdownHandler);
 $errorMiddleware = $app->addErrorMiddleware($displayErrorDetails, false, false);

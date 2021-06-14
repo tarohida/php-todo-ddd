@@ -10,7 +10,7 @@
     }
   ],
   "require": {
-    "slim/slim": "^4.7",
+    "slim/slim": "4.*",
     "monolog/monolog": "^2.2",
     "robmorgan/phinx": "^0.12.6",
     "eftec/bladeone": "^3.52",
