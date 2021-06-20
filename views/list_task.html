@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>title</title>
+</head>
+<body>
+<div id="app">
+    <todo-item
+            v-for="task in tasks"
+            v-bind:task="task"
+            v-bind:key="task.id"
+    ></todo-item>
+</div>
+
+<!-- 開発バージョン、便利なコンソールの警告が含まれています -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    Vue.component('todo-item', {
+        props: ['task'],
+        template: '<li>{{ task.id }}: {{ task.title }}</li>'
+    })
+    const app = new Vue({
+        el: '#app',
+        data: {
+            tasks: null
+        },
+        mounted() {
+            class Task {
+                constructor(id, title) {
+                    this.id = id
+                    this.title = title
+                }
+            }
+            axios
+                .get('http://127.0.0.1/api/tasks')
+                .then(
+                    response => (
+                        this.tasks = response.data.map(task => new Task(task.id, task.title))
+                    )
+                )
+        }
+    });
+</script>
+</body>
+</html>

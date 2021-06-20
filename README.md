@@ -94,3 +94,7 @@ Phinx by CakePHP - https://phinx.org.
 
 created /var/www/html/phinx.php
 ```
+
+```
+docker-compose exec web chmod -R 777 /var/www/html/compiles
+```

@@ -5,6 +5,8 @@ use App\Application\Action\TaskCreateAction;
 use App\Application\Action\TaskCreateActionInterface;
 use App\Application\Controller\Http\Api\TaskCreateController;
 use App\Application\Controller\Http\Api\TaskCreateControllerInterface;
+use App\Application\Controller\Http\Form\ListTaskController;
+use App\Application\Controller\Http\Form\ListTaskControllerInterface;
 use App\Application\Controller\Http\Handler\HttpErrorHandler;
 use App\Application\Controller\Http\Handler\ShutdownHandler;
 use App\Domain\Task\TaskRepositoryInterface;
@@ -12,17 +14,20 @@ use App\Domain\Task\TaskService;
 use App\Domain\Task\TaskServiceInterface;
 use App\Infrastructure\Task\TaskRepository;
 use DI\Container;
+use eftec\bladeone\BladeOne;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Slim\Factory\AppFactory;
 use Slim\Factory\ServerRequestCreatorFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
+
+const PROJECT_ROOT_PATH = __DIR__ . '/../';
 
 $container = new Container();
 $container->set(PDO::class, function () {
@@ -31,6 +36,9 @@ $container->set(PDO::class, function () {
         'db_user',
         'db_password'
     );
+});
+$container->set(BladeOne::class, function () {
+    return new BladeOne(__DIR__.'/../views',__DIR__.'/../compiles');
 });
 $container->set(TaskRepositoryInterface::class, function (ContainerInterface $c) {
     $pdo = $c->get(PDO::class);
@@ -53,6 +61,10 @@ $container->set(TaskCreateControllerInterface::class, function (ContainerInterfa
     return new TaskCreateController($action);
 });
 
+$container->set(ListTaskControllerInterface::class, function () {
+    return new ListTaskController();
+});
+
 $container->set(LoggerInterface::class, function () {
     $formatter = new LineFormatter();
     $formatter->includeStacktraces(true);
@@ -69,13 +81,23 @@ AppFactory::setContainer($container);
 $app = AppFactory::create();
 $app->addRoutingMiddleware();
 $app->redirect('/', 'tasks');
-$app->get('/tasks', function (Request $request, Response $response) {
-    $response->getBody()->write('not implement');
-    return $response;
+$app->get('/tasks', ListTaskControllerInterface::class);
+$app->post('/api/tasks/{id}', TaskCreateControllerInterface::class);
+$app->get('/api/tasks', function (RequestInterface $request, Response $response) {
+    $ret = [
+        [
+            'id' => 1,
+            'title' => 'title1'
+        ],
+        [
+            'id' => 2,
+            'title' => 'title2'
+        ]
+    ];
+    $payload = json_encode($ret, JSON_PRETTY_PRINT);
+    $response->getBody()->write($payload);
+    return $response->withStatus(200);
 });
-
-$app->post('/tasks/{id}', TaskCreateControllerInterface::class);
-
 $displayErrorDetails = true;
 
 $callableResolver = $app->getCallableResolver();
