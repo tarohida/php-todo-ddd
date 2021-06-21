@@ -6,13 +6,12 @@ namespace App\Domain\Task;
 
 
 use App\Domain\Task\Exception\SpecifiedTaskNotFoundException;
-use App\Infrastructure\RepositoryBaseInterface;
 
 /**
  * Interface TaskRepositoryInterface
  * @package App\Domain\Task
  */
-interface TaskRepositoryInterface extends RepositoryBaseInterface
+interface TaskRepositoryInterface
 {
     /**
      * @param int $task_id

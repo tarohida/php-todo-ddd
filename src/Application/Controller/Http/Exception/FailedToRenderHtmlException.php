@@ -10,7 +10,7 @@ use JetBrains\PhpStorm\Pure;
 use Throwable;
 
 /**
- * Class HtmlRendarFailedException
+ * Class FailedToRenderHtmlException
  * @package App\Application\Controller\Http\Exception
  */
 class FailedToRenderHtmlException extends RuntimeException
@@ -18,13 +18,13 @@ class FailedToRenderHtmlException extends RuntimeException
     /**
      * @inheritDoc
      */
-    public function getLoggingMessage(): string
+    #[Pure] public function getLoggingMessage(): string
     {
         return $this->getMessage();
     }
 
     /**
-     * HtmlRendarFailedException constructor.
+     * FailedToRenderHtmlException constructor.
      * @param string $message
      * @param Throwable|null $previous
      */

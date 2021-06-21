@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 use App\Application\Action\TaskCreateAction;
 use App\Application\Action\TaskCreateActionInterface;
+use App\Application\Controller\Http\Api\ListTaskApiController;
+use App\Application\Controller\Http\Api\ListTaskApiControllerInterface;
 use App\Application\Controller\Http\Api\TaskCreateController;
 use App\Application\Controller\Http\Api\TaskCreateControllerInterface;
-use App\Application\Controller\Http\Form\ListTaskController;
-use App\Application\Controller\Http\Form\ListTaskControllerInterface;
+use App\Application\Controller\Http\ListTaskController;
+use App\Application\Controller\Http\ListTaskControllerInterface;
 use App\Application\Controller\Http\Handler\HttpErrorHandler;
 use App\Application\Controller\Http\Handler\ShutdownHandler;
 use App\Domain\Task\TaskRepositoryInterface;
@@ -19,8 +21,6 @@ use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Log\LoggerInterface;
 use Slim\Factory\AppFactory;
 use Slim\Factory\ServerRequestCreatorFactory;
@@ -61,6 +61,11 @@ $container->set(TaskCreateControllerInterface::class, function (ContainerInterfa
     return new TaskCreateController($action);
 });
 
+$container->set(ListTaskApiControllerInterface::class, function (ContainerInterface $c) {
+    $repository = $c->get(TaskRepositoryInterface::class);
+    return new ListTaskApiController($repository);
+});
+
 $container->set(ListTaskControllerInterface::class, function () {
     return new ListTaskController();
 });
@@ -83,21 +88,8 @@ $app->addRoutingMiddleware();
 $app->redirect('/', 'tasks');
 $app->get('/tasks', ListTaskControllerInterface::class);
 $app->post('/api/tasks/{id}', TaskCreateControllerInterface::class);
-$app->get('/api/tasks', function (RequestInterface $request, Response $response) {
-    $ret = [
-        [
-            'id' => 1,
-            'title' => 'title1'
-        ],
-        [
-            'id' => 2,
-            'title' => 'title2'
-        ]
-    ];
-    $payload = json_encode($ret, JSON_PRETTY_PRINT);
-    $response->getBody()->write($payload);
-    return $response->withStatus(200);
-});
+$app->get('/api/tasks', ListTaskApiControllerInterface::class);
+
 $displayErrorDetails = true;
 
 $callableResolver = $app->getCallableResolver();

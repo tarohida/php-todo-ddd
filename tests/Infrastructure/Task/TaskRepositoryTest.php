@@ -7,15 +7,16 @@ namespace Tests\Infrastructure\Task;
 use App\Domain\Task\Exception\SpecifiedTaskNotFoundException;
 use App\Domain\Task\Exception\TaskValidateException;
 use App\Domain\Task\TaskInterface;
+use App\Domain\Task\TaskIteratorInterface;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Infrastructure\Pdo\Exception\NotAffectedException;
+use App\Infrastructure\Pdo\Exception\PdoReturnUnexpectedValueException;
 use App\Infrastructure\Pdo\Exception\TooAffectedException;
 use App\Infrastructure\Task\TaskRepository;
 use PDO;
 use PDOStatement;
 use PHPUnit\Framework\MockObject\Stub;
 use Tests\Infrastructure\DatabaseTestCase;
-use Tests\Infrastructure\Exception\RuntimeException\PdoReturnUnexpectedValueException;
 
 /**
  * Class TaskRepositoryTest
@@ -54,17 +55,17 @@ SQL;
         $pdo_statement->bindParam(':id', $id);
         $pdo_statement->bindParam(':title', $title);
         $pdo_statement->execute();
+        $id = 2;
+        $title = 'title2';
+        $pdo_statement->execute();
     }
 
     private function clean()
     {
         $query = <<<SQL
 delete from tasks
-where id = :id;
 SQL;
-        $id = 1;
         $pdo_statement = $this->pdo->prepare($query);
-        $pdo_statement->bindParam(':id', $id);
         $pdo_statement->execute();
     }
 
@@ -119,6 +120,10 @@ Array
         )
 
 )
+Array
+(
+    [0] => 1
+)
 
 EOF;
 
@@ -130,8 +135,6 @@ EOF;
         try {
             $repository->find(1);
         } catch (PdoReturnUnexpectedValueException $ex) {
-            $this->assertSame('1行以上の行が返されました', $ex->getMessage());
-            $this->assertSame($array, $ex->getParams());
             $this->assertSame($logging_message, $ex->getLoggingMessage());
         }
     }
@@ -152,6 +155,10 @@ Array
         )
 
 )
+Array
+(
+    [0] => 1
+)
 
 EOF;
 
@@ -163,8 +170,6 @@ EOF;
         try {
             $repository->find(1);
         } catch (PdoReturnUnexpectedValueException $ex) {
-            $this->assertSame('必要なパラメタが存在しません', $ex->getMessage());
-            $this->assertSame($array, $ex->getParams());
             $this->assertSame($logging_message, $ex->getLoggingMessage());
         }
     }
@@ -185,6 +190,10 @@ Array
         )
 
 )
+Array
+(
+    [0] => 1
+)
 
 EOF;
 
@@ -196,8 +205,6 @@ EOF;
         try {
             $repository->find(1);
         } catch (PdoReturnUnexpectedValueException $ex) {
-            $this->assertSame('idの値が不正です', $ex->getMessage());
-            $this->assertSame($array, $ex->getParams());
             $this->assertSame($logging_message, $ex->getLoggingMessage());
         }
     }
@@ -255,6 +262,13 @@ EOF;
         } catch (TooAffectedException $ex) {
             $this->assertTrue(!empty($ex->getLoggingMessage()));
         }
+    }
+
+    public function test_method_list()
+    {
+        $list = $this->repository->list();
+        $this->assertInstanceOf(TaskIteratorInterface::class, $list);
+        $this->assertCount(2, $list);
     }
 
     protected function tearDown(): void

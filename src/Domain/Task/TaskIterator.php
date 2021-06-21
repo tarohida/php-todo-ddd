@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Domain\Task;
 
 
+/**
+ * Class TaskIterator
+ * @package App\Domain\Task
+ */
 class TaskIterator implements TaskIteratorInterface
 {
     private array $tasks;
@@ -19,7 +23,10 @@ class TaskIterator implements TaskIteratorInterface
         }
     }
 
-     function add(TaskInterface $task)
+    /**
+     * @param TaskInterface $task
+     */
+    private function add(TaskInterface $task)
     {
         $this->tasks[] = $task;
     }
@@ -47,5 +54,14 @@ class TaskIterator implements TaskIteratorInterface
     public function rewind()
     {
         $this->position = 0;
+    }
+
+    public function getArray(): array
+    {
+        $array = [];
+        foreach ($this as $task) {
+            $array[] = ['id' => $task->id(), 'title' => $task->title()];
+        }
+        return $array;
     }
 }

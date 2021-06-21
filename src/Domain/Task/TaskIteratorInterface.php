@@ -15,4 +15,5 @@ use Iterator;
  */
 interface TaskIteratorInterface extends Iterator
 {
+    public function getArray(): array;
 }

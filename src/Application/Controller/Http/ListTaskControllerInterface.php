@@ -2,10 +2,8 @@
 declare(strict_types=1);
 
 
-namespace App\Application\Controller\Http\Form;
+namespace App\Application\Controller\Http;
 
-
-use App\Application\Controller\Http\SlimHttpControllerInterface;
 
 /**
  * Interface ListTaskControllerInterface
@@ -13,5 +11,4 @@ use App\Application\Controller\Http\SlimHttpControllerInterface;
  */
 interface ListTaskControllerInterface extends SlimHttpControllerInterface
 {
-
 }

@@ -11,7 +11,6 @@ use App\Domain\Task\Exception\TaskValidateException;
 use App\Domain\Task\Task;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Domain\Task\TaskServiceInterface;
-use PDOException;
 
 /**
  * Class TaskCreateAction
@@ -37,16 +36,9 @@ class TaskCreateAction implements TaskCreateActionInterface
         $id = $command->id();
         $title = $command->title();
         $task = new Task($id, $title);
-        try {
-            $this->repository->beginTransaction();
-            if ($this->task_service->taskExists($id)) {
-                throw new TaskAlreadyExistsException($id);
-            }
-            $this->repository->save($task);
-            $this->repository->commit();
-        } catch (PDOException $ex) {
-            $this->repository->rollback();
-            throw $ex;
+        if ($this->task_service->taskExists($id)) {
+            throw new TaskAlreadyExistsException($id);
         }
+        $this->repository->save($task);
     }
 }
