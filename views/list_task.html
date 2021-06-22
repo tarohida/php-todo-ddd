@@ -3,36 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <title>title</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 </head>
 <body>
 <div id="app">
-    <todo-item
-            v-for="task in tasks"
-            v-bind:task="task"
-            v-bind:key="task.id"
-    ></todo-item>
+    <div>
+        <p v-if="errors.length">
+            <b>Please correct the following error(s):</b>
+        <ul>
+            <li v-for="error in errors">{{ error }}</li>
+        </ul>
+        <input class="new-task"
+               autofocus
+               autocomplete="off"
+               placeholder="What needs to be done?"
+               v-model="new_task"
+               @keyup.enter="addTodo"
+               />
+        <div class="form-check">
+            <todo-item
+                    v-for="task in tasks"
+                    v-bind:task="task"
+                    v-bind:key="task.id"
+            ></todo-item>
+        </div>
+    </div>
 </div>
 
 <!-- 開発バージョン、便利なコンソールの警告が含まれています -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
     Vue.component('todo-item', {
         props: ['task'],
-        template: '<li>{{ task.id }}: {{ task.title }}</li>'
+        template: '<li><label><input type="checkbox" class="form-check-input" v-model="task.completed">{{ task.title }}</label></li>'
     })
+
+    class Task {
+        constructor(id, title) {
+            this.id = id
+            this.title = title
+            this.completed = false
+        }
+    }
+
     const app = new Vue({
         el: '#app',
         data: {
+            errors: [],
+            new_task: "",
             tasks: null
         },
         mounted() {
-            class Task {
-                constructor(id, title) {
-                    this.id = id
-                    this.title = title
-                }
-            }
             axios
                 .get('http://127.0.0.1/api/tasks')
                 .then(
@@ -40,6 +65,54 @@
                         this.tasks = response.data.map(task => new Task(task.id, task.title))
                     )
                 )
+        },
+        methods: {
+            addTodo: function () {
+                const value = this.new_task && this.new_task.trim();
+                this.errors = []
+                let errors = this.errors;
+                if (!value) {
+                    return;
+                }
+                const bodyFormData = new FormData();
+                bodyFormData.append('title', value);
+                axios({
+                    method: 'post',
+                    url: '/api/tasks/create',
+                    data: bodyFormData,
+                    headers: { "Content-Type": "multipart/form-data" },
+                })
+                    .then(
+                        response => (
+                            console.log(response.data.map(task => new Task(task.id, task.title)))
+                        )
+                    )
+                    .catch(function (error) {
+                    if (error.response) {
+                        // The request was made and the server responded with a status code
+                        // that falls out of the range of 2xx
+                        if (400 <= error.response.status < 500) {
+                            if (error.response.data.type === 'https://github.com/tarohida/php-todo-ddd/wiki/errors#validation-error') {
+                                error.response.data.invalid_params.map(invalid_param =>
+                                    errors.push(invalid_param.name + ': ' + invalid_param.reason)
+                                );
+                            }
+                        }
+                        console.log(error.response.data);
+                        console.log(error.response.status);
+                        console.log(error.response.headers);
+                    } else if (error.request) {
+                        // The request was made but no response was received
+                        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                        // http.ClientRequest in node.js
+                        console.log(error.request);
+                    } else {
+                        // Something happened in setting up the request that triggered an Error
+                        console.log('Error', error.message);
+                    }
+                    console.log(error.config);
+                });
+            }
         }
     });
 </script>
