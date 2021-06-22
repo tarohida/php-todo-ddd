@@ -3,9 +3,7 @@ declare(strict_types=1);
 
 namespace Tests\Application\Controller\Http\Api;
 
-use App\Application\Action\Exception\TaskAlreadyExistsException\TaskAlreadyExistsException;
 use App\Application\Action\TaskCreateActionInterface;
-use App\Application\Controller\Http\Api\Response\ConflictApiProblem;
 use App\Application\Controller\Http\Api\Response\ValidationApiProblem;
 use App\Application\Controller\Http\Api\TaskCreateController;
 use App\Application\Controller\Http\Api\TaskCreateControllerInterface;
@@ -43,44 +41,13 @@ class TaskCreateControllerTest extends TestCase
         $this->response = $this->createStub(ResponseInterface::class);
         $this->response->method('getBody')
             ->willReturn($body);
-        $this->args = [
-            'id' => 1,
-            'title' => 'title1'
-        ];
+        $this->args = [];
         $this->controller = new TaskCreateController($this->action);
     }
 
     public function test_implements_TaskCreateControllerInterface()
     {
         $this->assertInstanceOf(TaskCreateControllerInterface::class, $this->controller);
-    }
-
-    public function test_method_invoke_if_id_not_found_throw_ValidationApiProblemException()
-    {
-        $controller = new TaskCreateController($this->action);
-        $args = [];
-        $this->request->method('getParsedBody')
-            ->willReturn(['title' => 'title1']);
-        try {
-            call_user_func($controller, $this->request, $this->response, $args);
-            $this->fail('need to raise exception');
-        } catch (ValidationApiProblem $exception) {
-            $this->assertArrayHasKey('invalid-params', $exception->getExtensions());
-        }
-    }
-
-    public function test_method_invoke_if_id_param_is_not_numeric_then_throw_InvalidApiProblemException()
-    {
-        $controller = new TaskCreateController($this->action);
-        $args = ['id' => 'str'];
-        $this->request->method('getParsedBody')
-            ->willReturn(['title' => 'title1']);
-        try {
-            call_user_func($controller, $this->request, $this->response, $args);
-            $this->fail('need to raise exception');
-        } catch (ValidationApiProblem $exception) {
-            $this->assertArrayHasKey('invalid-params', $exception->getExtensions());
-        }
     }
 
     public function test_method_invoke_if_title_param_not_exists_then_throws_InvalidApiProblemException()
@@ -92,29 +59,7 @@ class TaskCreateControllerTest extends TestCase
             call_user_func($controller, $this->request, $this->response, $this->args);
             $this->fail('need to raise exception');
         } catch (ValidationApiProblem $exception) {
-            $this->assertArrayHasKey('invalid-params', $exception->getExtensions());
-        }
-    }
-
-    public function test_method_invoke_if_raise_TaskAlreadyException_throw_ConflictApiProblem()
-    {
-        $expected = [
-            'conflicted' =>
-                [
-                    'name' => 'id',
-                    'value' => 1
-                ]
-        ];
-        $ex = new TaskAlreadyExistsException(1);
-        $this->request->method('getParsedBody')
-            ->willReturn(['title' => 'title1']);
-        $this->action->method('create')
-            ->willThrowException($ex);
-        $controller = new TaskCreateController($this->action);
-        try {
-            call_user_func($controller, $this->request, $this->response, $this->args);
-        } catch (ConflictApiProblem $ex) {
-            $this->assertSame($expected, $ex->getExtensions());
+            $this->assertArrayHasKey('invalid_params', $exception->getExtensions());
         }
     }
 
@@ -137,7 +82,7 @@ class TaskCreateControllerTest extends TestCase
             call_user_func($controller, $this->request, $this->response, $this->args);
             $this->fail('need to raise exception');
         } catch (ValidationApiProblem $exception) {
-            $this->assertArrayHasKey('invalid-params', $exception->getExtensions());
+            $this->assertArrayHasKey('invalid_params', $exception->getExtensions());
         }
     }
 

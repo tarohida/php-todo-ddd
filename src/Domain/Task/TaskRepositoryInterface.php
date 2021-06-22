@@ -32,4 +32,5 @@ interface TaskRepositoryInterface
      * @return mixed
      */
     public function delete(int $task_id): void;
+    public function getNextValueInSequence(): int;
 }

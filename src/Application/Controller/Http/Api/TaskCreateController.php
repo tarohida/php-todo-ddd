@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace App\Application\Controller\Http\Api;
 
 
-use App\Application\Action\Exception\TaskAlreadyExistsException\TaskAlreadyExistsException;
 use App\Application\Action\TaskCreateActionInterface;
 use App\Application\Command\Task\TaskCreateCommand;
-use App\Application\Controller\Http\Api\Response\ConflictApiProblem;
 use App\Application\Controller\Http\Api\Response\ValidationApiProblem;
 use App\Domain\Task\Exception\TaskValidateException;
 use Psr\Http\Message\ResponseInterface;
@@ -29,19 +27,14 @@ class TaskCreateController implements TaskCreateControllerInterface
     ) {}
 
     /**
-     * @throws ConflictApiProblem
      * @throws ValidationApiProblem
      */
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         $parameter = $request->getParsedBody();
-        if (!isset($args['id']) || !isset($parameter['title'])) {
+        if (!isset($parameter['title'])) {
             $extensions = [
-                'invalid-params' => [
-                    [
-                        'name' => 'id',
-                        'reason' => 'must be set'
-                    ],
+                'invalid_params' => [
                     [
                         'name' => 'title',
                         'reason' => 'must be set'
@@ -50,28 +43,9 @@ class TaskCreateController implements TaskCreateControllerInterface
             ];
             throw new ValidationApiProblem('必須パラメータが不足しています。', $extensions);
         }
-        if (!is_numeric($args['id'])) {
-            $extensions = [
-                'name' => 'id',
-                'reason' => 'must be numeric'
-            ];
-            throw new ValidationApiProblem(
-                'idの値は数値である必要があります',
-                ['invalid-params' => $extensions]
-            );
-        }
-        $command = new TaskCreateCommand((int)$args['id'], $parameter['title']);
+        $command = new TaskCreateCommand($parameter['title']);
         try {
-            $this->action->create($command);
-        } catch (TaskAlreadyExistsException $e) {
-            $extensions = [
-                'name' => 'id',
-                'value' => $e->getTaskId()
-            ];
-            throw new ConflictApiProblem(
-                '該当のタスクはすでに存在します。',
-                ['conflicted' => $extensions]
-            );
+            $task = $this->action->create($command);
         } catch (TaskValidateException $e) {
             $invalid_params = [];
             foreach ($e->getViolateParams() as $violateParam) {
@@ -82,12 +56,12 @@ class TaskCreateController implements TaskCreateControllerInterface
             }
             throw new ValidationApiProblem(
                 'Taskのパラメタが不正です',
-                ['invalid-params' => $invalid_params]
+                ['invalid_params' => $invalid_params]
             );
         }
         $return_params = [
-            'id' => $command->id(),
-            'title' => $command->title()
+            'id' => $task->id(),
+            'title' => $task->title()
         ];
         $payload = json_encode($return_params, JSON_PRETTY_PRINT);
         $response->getBody()->write($payload);

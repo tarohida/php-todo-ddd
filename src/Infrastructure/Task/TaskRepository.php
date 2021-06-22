@@ -114,4 +114,21 @@ SQL;
     {
         throw new LogicException();
     }
+
+    public function getNextValueInSequence(): int
+    {
+        $query = <<<'SQL'
+select nextval('tasks_id_seq')
+SQL;
+        $pdo_statement = $this->pdo->prepare($query);
+        $pdo_statement->execute();
+        $data_set = $pdo_statement->fetchAll(PDO::FETCH_ASSOC);
+        if (count($data_set) !== 1 ||
+            !isset($data_set[0]['nextval']) ||
+            !is_numeric($data_set[0]['nextval']))
+        {
+            throw new PdoReturnUnexpectedValueException($data_set, []);
+        }
+        return (int)$data_set[0]['nextval'];
+    }
 }

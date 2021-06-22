@@ -278,4 +278,11 @@ EOF;
         unset($this->pdo);
     }
 
+    /**
+     * sequenceによって変える値は変わるので、単にintが変えることのみテストする
+     */
+    public function test_method_getNextValueInSequense()
+    {
+        $this->assertIsInt($this->repository->getNextValueInSequence());
+    }
 }

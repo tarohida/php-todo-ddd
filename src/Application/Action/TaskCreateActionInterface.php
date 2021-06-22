@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Application\Action;
 
 
-use App\Application\Action\Exception\TaskAlreadyExistsException\TaskAlreadyExistsException;
 use App\Application\Command\Task\TaskCreateCommandInterface;
 use App\Domain\Task\Exception\TaskValidateException;
+use App\Domain\Task\TaskInterface;
 
 /**
  * Interface TaskCreateActionInterface
@@ -17,9 +17,8 @@ interface TaskCreateActionInterface
 {
     /**
      * @param TaskCreateCommandInterface $command
-     * @return void
-     * @throws  TaskAlreadyExistsException
-     * @throws  TaskValidateException
+     * @return TaskInterface
+     * @throws TaskValidateException
      */
-    public function create(TaskCreateCommandInterface $command): void;
+    public function create(TaskCreateCommandInterface $command): TaskInterface;
 }

@@ -13,26 +13,19 @@ use PHPUnit\Framework\TestCase;
  */
 class TaskCreateCommandTest extends TestCase
 {
-    private int $id;
     private string $title;
     private TaskCreateCommand $command;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->id = 1;
         $this->title = 'title1';
-        $this->command = new TaskCreateCommand($this->id, $this->title);
+        $this->command = new TaskCreateCommand($this->title);
     }
 
     public function test_implements_TaskCreateCommandInterface()
     {
         $this->assertInstanceOf(TaskCreateCommandInterface::class, $this->command);
-    }
-
-    public function test_method_id()
-    {
-        $this->assertSame($this->id, $this->command->id());
     }
 
     public function test_method_title()

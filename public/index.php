@@ -16,6 +16,8 @@ use App\Domain\Task\TaskService;
 use App\Domain\Task\TaskServiceInterface;
 use App\Infrastructure\Task\TaskRepository;
 use DI\Container;
+use DI\DependencyException;
+use DI\NotFoundException;
 use eftec\bladeone\BladeOne;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
@@ -52,8 +54,7 @@ $container->set(TaskServiceInterface::class, function (ContainerInterface $c) {
 
 $container->set(TaskCreateActionInterface::class, function (ContainerInterface $c){
     $repository = $c->get(TaskRepositoryInterface::class);
-    $service = $c->get(TaskServiceInterface::class);
-    return new TaskCreateAction($repository, $service);
+    return new TaskCreateAction($repository);
 });
 
 $container->set(TaskCreateControllerInterface::class, function (ContainerInterface $c) {
@@ -80,14 +81,18 @@ $container->set(LoggerInterface::class, function () {
     return $logger;
 });
 
-$logger = $container->get(LoggerInterface::class);
+try {
+    $logger = $container->get(LoggerInterface::class);
+} catch (DependencyException | NotFoundException $e) {
+    die('container error');
+}
 
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 $app->addRoutingMiddleware();
 $app->redirect('/', 'tasks');
 $app->get('/tasks', ListTaskControllerInterface::class);
-$app->post('/api/tasks/{id}', TaskCreateControllerInterface::class);
+$app->post('/api/tasks/create', TaskCreateControllerInterface::class);
 $app->get('/api/tasks', ListTaskApiControllerInterface::class);
 
 $displayErrorDetails = true;
