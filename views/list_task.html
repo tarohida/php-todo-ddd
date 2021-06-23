@@ -8,21 +8,15 @@
 </head>
 <body>
 <div id="app">
-    <div>
-        <p v-if="errors.length">
-            <b>Please correct the following error(s):</b>
-        <ul>
-            <li v-for="error in errors">{{ error }}</li>
-        </ul>
-        <input class="new-task"
+    <error-renderer v-bind:errors="errors"></error-renderer>
+    <input class="new-task"
                autofocus
                autocomplete="off"
                placeholder="What needs to be done?"
                v-model="new_task"
                @keyup.enter="addTodo"
-        />
-        <todo-list v-bind:tasks="tasks"></todo-list>
-    </div>
+    />
+    <todo-list v-bind:tasks="tasks"></todo-list>
 </div>
 
 <!-- 開発バージョン、便利なコンソールの警告が含まれています -->
@@ -38,11 +32,25 @@
 <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
+    Vue.component('task-create-form', {
+
+    })
     Vue.component('error-renderer', {
         props: ['errors'],
-        templates:
-            ''
+        template:
+            '<div v-if="errors.length"><error-message></error-message><error-list v-bind:errors="errors"></error-list></div>'
     })
+
+    Vue.component('error-message', {
+        template: '<b>Please correct the following error(s)</b>'
+    })
+
+    Vue.component('error-list', {
+        props: ['errors'],
+        template:
+            '<ul><li v-for="error in errors">{{ error }}</li></ul>'
+    })
+
     Vue.component('todo-list', {
         props: ['tasks'],
         template:
