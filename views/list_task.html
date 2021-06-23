@@ -21,15 +21,7 @@
                v-model="new_task"
                @keyup.enter="addTodo"
         />
-        <div class="form-check">
-            <ul class="list-group">
-                <todo-item
-                        v-for="task in tasks"
-                        v-bind:task="task"
-                        v-bind:key="task.id"
-                ></todo-item>
-            </ul>
-        </div>
+        <todo-list v-bind:tasks="tasks"></todo-list>
     </div>
 </div>
 
@@ -46,13 +38,23 @@
 <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
+    Vue.component('error-renderer', {
+        props: ['errors'],
+        templates:
+            ''
+    })
+    Vue.component('todo-list', {
+        props: ['tasks'],
+        template:
+            '<div class="form-check"><ul class="list-group"><todo-item v-for="task in tasks" v-bind:task="task" v-bind:key="task.id"></todo-item></ul></div>'
+    })
     Vue.component('todo-item', {
         props: ['task'],
         template: '<li class="list-group-item"><todo-checkbox v-bind:task="task"></todo-checkbox></li>'
     })
     Vue.component('todo-checkbox', {
         props: ['task'],
-        template: '<li class="list-group-item"><label><input type="checkbox" class="form-check-input" v-model="task.completed">{{ task.title }}</label></li>'
+        template: '<label><input type="checkbox" class="form-check-input" v-model="task.completed">{{ task.title }}</label>'
     })
 
     class Task {
