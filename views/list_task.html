@@ -5,6 +5,7 @@
     <title>title</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
 <div id="app">
@@ -58,11 +59,25 @@
     })
     Vue.component('todo-item', {
         props: ['task'],
-        template: '<li class="list-group-item"><todo-checkbox v-bind:task="task"></todo-checkbox></li>'
+        template: `
+          <li class="list-group-item"><todo-checkbox v-bind:task="task"></todo-checkbox><delete-task-button v-bind:task-id="task.id"></delete-task-button></li>
+          `
     })
     Vue.component('todo-checkbox', {
         props: ['task'],
         template: '<label><input type="checkbox" class="form-check-input" v-model="task.completed">{{ task.title }}</label>'
+    })
+
+    Vue.component('delete-task-button', {
+        props: ['taskId'],
+        template: `
+          <button class="btn" v-on:click="deleteTask"><i class="fa fa-trash"></i></button>
+          `,
+        methods: {
+            deleteTask: function () {
+                axios.delete(`/api/tasks/${this.taskId}`)
+            }
+        }
     })
 
     class Task {
