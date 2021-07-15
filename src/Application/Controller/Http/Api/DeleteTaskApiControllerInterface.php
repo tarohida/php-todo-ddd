@@ -11,6 +11,6 @@ use App\Application\Controller\Http\SlimHttpControllerInterface;
  * Interface TaskDeleteApiControllerInterface
  * @package App\Application\Controller\Http\Api
  */
-interface TaskDeleteApiControllerInterface extends SlimHttpControllerInterface
+interface DeleteTaskApiControllerInterface extends SlimHttpControllerInterface
 {
 }

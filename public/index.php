@@ -7,8 +7,8 @@ use App\Application\Controller\Http\Api\ListTaskApiController;
 use App\Application\Controller\Http\Api\ListTaskApiControllerInterface;
 use App\Application\Controller\Http\Api\TaskCreateController;
 use App\Application\Controller\Http\Api\TaskCreateControllerInterface;
-use App\Application\Controller\Http\Api\TaskDeleteApiController;
-use App\Application\Controller\Http\Api\TaskDeleteApiControllerInterface;
+use App\Application\Controller\Http\Api\DeleteTaskApiController;
+use App\Application\Controller\Http\Api\DeleteTaskApiControllerInterface;
 use App\Application\Controller\Http\ListTaskController;
 use App\Application\Controller\Http\ListTaskControllerInterface;
 use App\Application\Controller\Http\Handler\HttpErrorHandler;
@@ -73,8 +73,8 @@ $container->set(ListTaskControllerInterface::class, function () {
     return new ListTaskController();
 });
 
-$container->set(TaskDeleteApiControllerInterface::class, function () {
-    return new TaskDeleteApiController();
+$container->set(DeleteTaskApiControllerInterface::class, function () {
+    return new DeleteTaskApiController();
 });
 
 $container->set(LoggerInterface::class, function () {
@@ -100,7 +100,7 @@ $app->redirect('/', 'tasks');
 $app->get('/tasks', ListTaskControllerInterface::class);
 $app->post('/api/tasks/create', TaskCreateControllerInterface::class);
 $app->get('/api/tasks', ListTaskApiControllerInterface::class);
-$app->delete('/api/tasks/{id}', TaskDeleteApiControllerInterface::class);
+$app->delete('/api/tasks/{id}', DeleteTaskApiControllerInterface::class);
 
 $displayErrorDetails = true;
 

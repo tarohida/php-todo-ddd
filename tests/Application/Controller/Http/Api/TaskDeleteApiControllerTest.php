@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Tests\Application\Controller\Http\Api;
 
-use App\Application\Controller\Http\Api\TaskDeleteApiController;
-use App\Application\Controller\Http\Api\TaskDeleteApiControllerInterface;
+use App\Application\Controller\Http\Api\DeleteTaskApiController;
+use App\Application\Controller\Http\Api\DeleteTaskApiControllerInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -13,16 +13,16 @@ use PHPUnit\Framework\TestCase;
  */
 class TaskDeleteApiControllerTest extends TestCase
 {
-    private TaskDeleteApiController $controller;
+    private DeleteTaskApiController $controller;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->controller = new TaskDeleteApiController();
+        $this->controller = new DeleteTaskApiController();
     }
 
     public function test_implement_interface()
     {
-        $this->assertInstanceOf(TaskDeleteApiControllerInterface::class, $this->controller);
+        $this->assertInstanceOf(DeleteTaskApiControllerInterface::class, $this->controller);
     }
 }

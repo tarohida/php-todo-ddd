@@ -12,7 +12,7 @@ use Psr\Http\Message\ServerRequestInterface;
  * Class TaskDeleteApiController
  * @package App\Application\Controller\Http\Api
  */
-class TaskDeleteApiController implements TaskDeleteApiControllerInterface
+class DeleteTaskApiController implements DeleteTaskApiControllerInterface
 {
     /**
      * TaskDeleteApiController constructor.
