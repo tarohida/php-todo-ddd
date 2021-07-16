@@ -1,9 +1,13 @@
 <?php
+/** @noinspection  PhpUnhandledExceptionInspection*/
+/** @noinspection PhpDocMissingThrowsInspection */
+
 declare(strict_types=1);
 
 namespace Tests\Domain\Task;
 
-use App\Domain\Task\Exception\TaskValidateException;
+use App\Domain\Task\Exception\TaskValidateFailedWithIdException;
+use App\Domain\Task\Exception\TaskValidateFailedWithTitleException;
 use App\Domain\Task\Task;
 use App\Domain\Task\TaskInterface;
 use PHPUnit\Framework\TestCase;
@@ -18,27 +22,21 @@ class TaskTest extends TestCase
     private int $id;
     private string $title;
 
-    public function validParamsProvider(): array
-    {
-        return [
-            [10000000, 'title1'],
-            [1, '1'],
-            [1, '☔']
-        ];
-    }
-
-    public function notValidParamsProvider(): array
+    public function notValidIdProvider(): array
     {
         return [
             [0, 'title1'],
             [-1, 'title'],
+        ];
+    }
+
+    public function notValidTitleProvider(): array
+    {
+        return [
             [1, '']
         ];
     }
 
-    /**
-     * @throws TaskValidateException
-     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -48,35 +46,25 @@ class TaskTest extends TestCase
     }
 
     /**
-     * @dataProvider validParamsProvider
-     * @param $id
-     * @param $title
-     * @throws TaskValidateException
-     */
-    public function test_construct($id, $title)
-    {
-        $this->assertInstanceOf(Task::class, new Task($id, $title));
-    }
-
-    /**
-     * @dataProvider notValidParamsProvider
+     * @dataProvider notValidIdProvider
      * @param $id
      * @param $title
      */
-    public function test_construct_throw_TaskValidateException($id, $title)
+    public function test_validate_id($id, $title)
     {
-        $this->expectException(TaskValidateException::class);
+        $this->expectException(TaskValidateFailedWithIdException::class);
         new Task($id, $title);
     }
 
-    public function invalid_construct_param_provider(): array
+    /**
+     * @dataProvider notValidTitleProvider
+     * @param $id
+     * @param $title
+     */
+    public function test_validate_title($id, $title)
     {
-        // id, title
-        return [
-            [null, 'title1'],
-            [1, null],
-            [null, null]
-        ];
+        $this->expectException(TaskValidateFailedWithTitleException::class);
+        new Task($id, $title);
     }
 
     public function test_implements_TaskInterface()
