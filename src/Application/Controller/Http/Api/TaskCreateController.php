@@ -8,7 +8,7 @@ namespace App\Application\Controller\Http\Api;
 use App\Application\Action\TaskCreateActionInterface;
 use App\Application\Command\Task\TaskCreateCommand;
 use App\Application\Controller\Http\Api\Response\ValidationApiProblem;
-use App\Domain\Task\Exception\TaskValidateException;
+use App\Domain\Task\Exception\TaskValidateFailedWithTitleException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -46,14 +46,8 @@ class TaskCreateController implements TaskCreateControllerInterface
         $command = new TaskCreateCommand($parameter['title']);
         try {
             $task = $this->action->create($command);
-        } catch (TaskValidateException $e) {
-            $invalid_params = [];
-            foreach ($e->getViolateParams() as $violateParam) {
-                $invalid_param = [];
-                $invalid_param['name'] = $violateParam->getName();
-                $invalid_param['reason'] = $violateParam->getReason();
-                $invalid_params[] = $invalid_param;
-            }
+        } catch (TaskValidateFailedWithTitleException) {
+            $invalid_params = ['name' => 'title', 'reason' => 'Titleは1文字以上である必要があります'];
             throw new ValidationApiProblem(
                 'Taskのパラメタが不正です',
                 ['invalid_params' => $invalid_params]

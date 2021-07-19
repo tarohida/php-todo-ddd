@@ -7,10 +7,7 @@ use App\Application\Action\TaskCreateActionInterface;
 use App\Application\Controller\Http\Api\Response\ValidationApiProblem;
 use App\Application\Controller\Http\Api\TaskCreateController;
 use App\Application\Controller\Http\Api\TaskCreateControllerInterface;
-use App\Application\Validation\ViolateParam\ViolateParamInterface;
-use App\Application\Validation\ViolateParam\ViolateParamIteratorInterface;
-use App\Domain\Task\Exception\TaskValidateException;
-use Iterator;
+use App\Domain\Task\Exception\TaskValidateFailedWithTitleException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
@@ -63,18 +60,11 @@ class TaskCreateControllerTest extends TestCase
         }
     }
 
-    public function test_method_invoke_if_raise_TaskValidateException_throw_ValidationApiProblem()
+    public function test_method_invoke_if_raise_TaskValidateFailedWithTitleException_throw_ValidationApiProblem()
     {
         $this->request->method('getParsedBody')
             ->willReturn(['title' => 'title1']);
-        $violate_param = $this->createStub(ViolateParamInterface::class);
-        $violate_param->method('getName')->willReturn('id');
-        $violate_param->method('getReason')->willReturn('reason1');
-        $violate_params_iterator = $this->createStub(ViolateParamIteratorInterface::class);
-        $this->mockIterator($violate_params_iterator, [$violate_param]);
-        $exception = $this->createStub(TaskValidateException::class);
-        $exception->method('getViolateParams')
-            ->willReturn($violate_params_iterator);
+        $exception = $this->createStub(TaskValidateFailedWithTitleException::class);
         $this->action->method('create')
             ->willThrowException($exception);
         $controller = new TaskCreateController($this->action);
@@ -84,44 +74,5 @@ class TaskCreateControllerTest extends TestCase
         } catch (ValidationApiProblem $exception) {
             $this->assertArrayHasKey('invalid_params', $exception->getExtensions());
         }
-    }
-
-    /**
-     * Mock iterator
-     *
-     * This attaches all the required expectations in the right order so that
-     * our iterator will act like an iterator!
-     * source from: http://www.davegardner.me.uk/blog/2011/03/04/mocking-iterator-with-phpunit/
-     *
-     * @param MockObject|Iterator $iterator The iterator object; this is what we attach
-     *      all the expectations to
-     * @param array An array of items that we will mock up, we will use the
-     *      keys (if needed) and values of this array to return
-     *      to "key"; only needed if you are doing foreach ($foo as $k => $v)
-     *      as opposed to foreach ($foo as $v)
-     * @author: dave@mpdconsulting.co.uk
-     */
-    private function mockIterator(
-        MockObject|Iterator $iterator,
-        array $items
-    )
-    {
-        $iterator->expects($this->at(0))
-            ->method('rewind');
-        $counter = 1;
-        foreach ($items as $v)
-        {
-            $iterator->expects($this->at($counter++))
-                ->method('valid')
-                ->will($this->returnValue(TRUE));
-            $iterator->expects($this->at($counter++))
-                ->method('current')
-                ->will($this->returnValue($v));
-            $iterator->expects($this->at($counter++))
-                ->method('next');
-        }
-        $iterator->expects($this->at($counter))
-            ->method('valid')
-            ->will($this->returnValue(FALSE));
     }
 }
