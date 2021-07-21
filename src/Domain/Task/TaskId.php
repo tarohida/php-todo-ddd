@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Task;
 
 
-use App\Domain\Task\Exception\TaskValidateFailedWithIdException;
+use App\Domain\Task\Exception\Validate\TaskIdMustBePositiveNumberException;
 
 /**
  * テストはTaskTest経由で実施している。
@@ -18,7 +18,7 @@ class TaskId
     private int $id;
 
     /**
-     * @throws TaskValidateFailedWithIdException
+     * @throws TaskIdMustBePositiveNumberException
      */
     public function __construct(int $id)
     {
@@ -27,12 +27,12 @@ class TaskId
     }
 
     /**
-     * @throws TaskValidateFailedWithIdException
+     * @throws TaskIdMustBePositiveNumberException
      */
     public static function validate(int $id): void
     {
         if ($id <= 0) {
-            throw new TaskValidateFailedWithIdException(reason: TaskValidateFailedWithIdException::REASON_MUST_BE_POSITIVE_NUMBER);
+            throw new TaskIdMustBePositiveNumberException();
         }
     }
 

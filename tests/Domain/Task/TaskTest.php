@@ -6,8 +6,8 @@ declare(strict_types=1);
 
 namespace Tests\Domain\Task;
 
-use App\Domain\Task\Exception\TaskValidateFailedWithIdException;
-use App\Domain\Task\Exception\TaskValidateFailedWithTitleException;
+use App\Domain\Task\Exception\Validate\TaskIdMustBePositiveNumberException;
+use App\Domain\Task\Exception\Validate\TaskTitleMustNotEmptyException;
 use App\Domain\Task\Task;
 use App\Domain\Task\TaskInterface;
 use PHPUnit\Framework\TestCase;
@@ -52,7 +52,7 @@ class TaskTest extends TestCase
      */
     public function test_validate_id($id, $title)
     {
-        $this->expectException(TaskValidateFailedWithIdException::class);
+        $this->expectException(TaskIdMustBePositiveNumberException::class);
         new Task($id, $title);
     }
 
@@ -63,7 +63,7 @@ class TaskTest extends TestCase
      */
     public function test_validate_title($id, $title)
     {
-        $this->expectException(TaskValidateFailedWithTitleException::class);
+        $this->expectException(TaskTitleMustNotEmptyException::class);
         new Task($id, $title);
     }
 

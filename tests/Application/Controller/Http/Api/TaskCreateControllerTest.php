@@ -7,7 +7,7 @@ use App\Application\Action\TaskCreateActionInterface;
 use App\Application\Controller\Http\Api\Response\ValidationApiProblem;
 use App\Application\Controller\Http\Api\TaskCreateController;
 use App\Application\Controller\Http\Api\TaskCreateControllerInterface;
-use App\Domain\Task\Exception\TaskValidateFailedWithTitleException;
+use App\Domain\Task\Exception\Validate\TaskTitleMustNotEmptyException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
@@ -64,7 +64,7 @@ class TaskCreateControllerTest extends TestCase
     {
         $this->request->method('getParsedBody')
             ->willReturn(['title' => 'title1']);
-        $exception = $this->createStub(TaskValidateFailedWithTitleException::class);
+        $exception = $this->createStub(TaskTitleMustNotEmptyException::class);
         $this->action->method('create')
             ->willThrowException($exception);
         $controller = new TaskCreateController($this->action);

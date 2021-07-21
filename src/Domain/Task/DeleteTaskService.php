@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Task;
 
 
-use App\Domain\Task\Exception\TaskValidateFailedWithIdException;
+use App\Domain\Task\Exception\Validate\TaskIdMustBePositiveNumberException;
 
 /**
  * Class DeleteTaskService
@@ -22,7 +22,7 @@ class DeleteTaskService implements DeleteTaskServiceInterface
     ) { }
 
     /**
-     * @throws TaskValidateFailedWithIdException
+     * @throws TaskIdMustBePositiveNumberException
      */
     public function delete(int $task_id): void
     {

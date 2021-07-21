@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Task;
 
 
-use App\Domain\Task\Exception\TaskValidateFailedWithTitleException;
+use App\Domain\Task\Exception\Validate\TaskTitleMustNotEmptyException;
 
 /**
  * テストはTaskTest経由で実施している
@@ -18,7 +18,7 @@ class TaskTitle
     private string $title;
 
     /**
-     * @throws TaskValidateFailedWithTitleException
+     * @throws TaskTitleMustNotEmptyException
      */
     public function __construct(string $title)
     {
@@ -32,11 +32,11 @@ class TaskTitle
     }
 
     /**
-     * @throws TaskValidateFailedWithTitleException
+     * @throws \App\Domain\Task\Exception\Validate\TaskTitleMustNotEmptyException
      */
     public static function validate(string $title) {
         if (empty($title)) {
-            throw new TaskValidateFailedWithTitleException(reason: TaskValidateFailedWithTitleException::REASON_MUST_NOT_BE_EMPTY);
+            throw new TaskTitleMustNotEmptyException();
         }
     }
 }

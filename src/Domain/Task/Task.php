@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Domain\Task;
 
 
-use App\Domain\Task\Exception\TaskValidateFailedWithIdException;
-use App\Domain\Task\Exception\TaskValidateFailedWithTitleException;
+use App\Domain\Task\Exception\Validate\TaskIdMustBePositiveNumberException;
+use App\Domain\Task\Exception\Validate\TaskTitleMustNotEmptyException;
 use JetBrains\PhpStorm\Pure;
 
 /**
@@ -22,8 +22,8 @@ class Task implements TaskInterface
      * Task constructor.
      * @param int $id
      * @param string $title
-     * @throws TaskValidateFailedWithIdException
-     * @throws TaskValidateFailedWithTitleException
+     * @throws TaskIdMustBePositiveNumberException
+     * @throws TaskTitleMustNotEmptyException
      */
     public function __construct(int $id, string $title) {
         $this->id = new TaskId($id);
