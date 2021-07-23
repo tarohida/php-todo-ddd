@@ -26,7 +26,7 @@ class DeleteTaskService implements DeleteTaskServiceInterface
      */
     public function delete(int $task_id): void
     {
-        TaskId::validate($task_id);
+        $task_id = new TaskId($task_id);
         $this->repository->delete($task_id);
     }
 }

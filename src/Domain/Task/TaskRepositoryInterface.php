@@ -14,11 +14,11 @@ use App\Domain\Task\Exception\SpecifiedTaskNotFoundException;
 interface TaskRepositoryInterface
 {
     /**
-     * @param int $task_id
+     * @param TaskId $task_id
      * @return TaskInterface
      * @throws SpecifiedTaskNotFoundException
      */
-    public function find(int $task_id): TaskInterface;
+    public function find(TaskId $task_id): TaskInterface;
     public function list(): TaskIteratorInterface;
 
     /**
@@ -28,9 +28,8 @@ interface TaskRepositoryInterface
     public function save(TaskInterface $task): void;
 
     /**
-     * @param int $task_id
-     * @return mixed
+     * @param TaskId $task_id
      */
-    public function delete(int $task_id): void;
+    public function delete(TaskId $task_id): void;
     public function getNextValueInSequence(): int;
 }

@@ -1,11 +1,13 @@
 <?php
+/** @noinspection NonAsciiCharacters */
+/** @noinspection PhpUnhandledExceptionInspection */
+/** @noinspection PhpDocMissingThrowsInspection */
 declare(strict_types=1);
 
 namespace Tests\Domain\Task;
 
 use App\Domain\Task\DeleteTaskService;
 use App\Domain\Task\DeleteTaskServiceInterface;
-use App\Domain\Task\Exception\Validate\TaskIdMustBePositiveNumberException;
 use App\Domain\Task\TaskRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -30,9 +32,6 @@ class DeleteTaskServiceTest extends TestCase
         self::assertInstanceOf(DeleteTaskServiceInterface::class, $this->service);
     }
 
-    /**
-     * @throws \App\Domain\Task\Exception\Validate\TaskIdMustBePositiveNumberException
-     */
     public function test_method_delete(): void
     {
         $this->repository->expects($this->once())

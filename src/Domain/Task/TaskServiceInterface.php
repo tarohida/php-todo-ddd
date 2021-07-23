@@ -11,5 +11,5 @@ namespace App\Domain\Task;
  */
 interface TaskServiceInterface
 {
-    public function taskExists(int $id): bool;
+    public function taskExists(TaskId $id): bool;
 }

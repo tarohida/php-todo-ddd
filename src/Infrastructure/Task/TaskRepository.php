@@ -7,12 +7,14 @@ namespace App\Infrastructure\Task;
 
 use App\Domain\Task\Exception\SpecifiedTaskNotFoundException;
 use App\Domain\Task\Exception\TaskValidateException;
+use App\Domain\Task\Exception\Validate\TaskIdMustBePositiveNumberException;
+use App\Domain\Task\Exception\Validate\TaskTitleMustNotEmptyException;
 use App\Domain\Task\Task;
+use App\Domain\Task\TaskId;
 use App\Domain\Task\TaskInterface;
 use App\Domain\Task\TaskIterator;
 use App\Domain\Task\TaskIteratorInterface;
 use App\Domain\Task\TaskRepositoryInterface;
-use App\Exception\LogicException;
 use App\Infrastructure\Pdo\Exception\NotAffectedException;
 use App\Infrastructure\Pdo\Exception\PdoReturnUnexpectedValueException;
 use App\Infrastructure\Pdo\Exception\TooAffectedException;
@@ -29,33 +31,39 @@ class TaskRepository implements TaskRepositoryInterface
     ) {}
 
     /**
-     * @throws SpecifiedTaskNotFoundException|TaskValidateException
+     * @param TaskId $task_id
+     * @return TaskInterface
+     * @throws SpecifiedTaskNotFoundException
      */
-    public function find(int $task_id): TaskInterface
+    public function find(TaskId $task_id): TaskInterface
     {
         $query = <<<SQL
 select id, title from tasks
 where id = :id
 SQL;
         $pdo_statement = $this->pdo->prepare($query);
-        $pdo_statement->bindValue(':id', $task_id);
+        $pdo_statement->bindValue(':id', $task_id->getId());
         $pdo_statement->execute();
         $params = $pdo_statement->fetchAll(PDO::FETCH_ASSOC);
         if (count($params) === 0) {
-            throw new SpecifiedTaskNotFoundException($task_id);
+            throw new SpecifiedTaskNotFoundException($task_id->getId());
         }
         if (count($params) != 1) {
-            throw new PdoReturnUnexpectedValueException($params, [$task_id]);
+            throw new PdoReturnUnexpectedValueException($params, [$task_id->getId()]);
         }
         if (!isset($params[0]['id']) || !isset($params[0]['title'])) {
-            throw new PdoReturnUnexpectedValueException($params, [$task_id]);
+            throw new PdoReturnUnexpectedValueException($params, [$task_id->getId()]);
         }
         $id = $params[0]['id'];
         $title = $params[0]['title'];
         if (!is_numeric($id)) {
-            throw new PdoReturnUnexpectedValueException($params, [$task_id]);
+            throw new PdoReturnUnexpectedValueException($params, [$task_id->getId()]);
         }
-        return new Task((int)$id, $title);
+        try {
+            return new Task((int)$id, $title);
+        } catch (TaskIdMustBePositiveNumberException | TaskTitleMustNotEmptyException $e) {
+            throw new PdoReturnUnexpectedValueException($params, [$task_id->getId()], $e);
+        }
     }
 
     public function list(): TaskIteratorInterface
@@ -108,11 +116,20 @@ SQL;
     }
 
     /**
-     * @param int $task_id
+     * @param TaskId $task_id
      */
-    public function delete(int $task_id): void
+    public function delete(TaskId $task_id): void
     {
-        throw new LogicException();
+        $sql = <<<'SQL'
+delete from tasks
+where id = :id
+SQL;
+        $pdo_statement = $this->pdo->prepare($sql);
+        $pdo_statement->bindValue(':id', $task_id->getId());
+        $pdo_statement->execute();
+        if ($pdo_statement->rowCount() > 1) {
+            throw new TooAffectedException([], $pdo_statement->rowCount());
+        }
     }
 
     public function getNextValueInSequence(): int

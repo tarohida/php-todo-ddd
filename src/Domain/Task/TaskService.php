@@ -22,7 +22,7 @@ class TaskService implements TaskServiceInterface
         private TaskRepositoryInterface $repository
     ){}
 
-    public function taskExists(int $id): bool
+    public function taskExists(TaskId $id): bool
     {
         try {
             $this->repository->find($id);

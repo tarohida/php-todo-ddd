@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Domain\Task\Exception\Validate;
 
 
-use App\Exception\TodoAppException;
+use App\Domain\Task\Exception\TaskValidateException;
 
 /**
  * Class TaskIdMustBePositiveNumberException
  * @package App\Domain\Task\Exception\Validate
  */
-class TaskIdMustBePositiveNumberException extends TodoAppException
+class TaskIdMustBePositiveNumberException extends TaskValidateException
 {
 }

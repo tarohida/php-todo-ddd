@@ -13,6 +13,8 @@ use App\Application\Controller\Http\ListTaskController;
 use App\Application\Controller\Http\ListTaskControllerInterface;
 use App\Application\Controller\Http\Handler\HttpErrorHandler;
 use App\Application\Controller\Http\Handler\ShutdownHandler;
+use App\Domain\Task\DeleteTaskService;
+use App\Domain\Task\DeleteTaskServiceInterface;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Domain\Task\TaskService;
 use App\Domain\Task\TaskServiceInterface;
@@ -59,6 +61,11 @@ $container->set(TaskCreateActionInterface::class, function (ContainerInterface $
     return new TaskCreateAction($repository);
 });
 
+$container->set(DeleteTaskServiceInterface::class, function (ContainerInterface $c) {
+    $repository = $c->get(TaskRepositoryInterface::class);
+    return new DeleteTaskService($repository);
+});
+
 $container->set(TaskCreateControllerInterface::class, function (ContainerInterface $c) {
     $action = $c->get(TaskCreateActionInterface::class);
     return new TaskCreateController($action);
@@ -73,8 +80,9 @@ $container->set(ListTaskControllerInterface::class, function () {
     return new ListTaskController();
 });
 
-$container->set(DeleteTaskApiControllerInterface::class, function () {
-    return new DeleteTaskApiController();
+$container->set(DeleteTaskApiControllerInterface::class, function (ContainerInterface $c) {
+    $service = $c->get(DeleteTaskServiceInterface::class);
+    return new DeleteTaskApiController($service);
 });
 
 $container->set(LoggerInterface::class, function () {

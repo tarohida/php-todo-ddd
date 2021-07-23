@@ -1,11 +1,15 @@
 <?php
 /** @noinspection NonAsciiCharacters */
+/** @noinspection PhpUnhandledExceptionInspection */
+/** @noinspection PhpDocMissingThrowsInspection */
+
 declare(strict_types=1);
 
 namespace Tests\Infrastructure\Task;
 
 use App\Domain\Task\Exception\SpecifiedTaskNotFoundException;
 use App\Domain\Task\Exception\TaskValidateException;
+use App\Domain\Task\TaskId;
 use App\Domain\Task\TaskInterface;
 use App\Domain\Task\TaskIteratorInterface;
 use App\Domain\Task\TaskRepositoryInterface;
@@ -79,7 +83,8 @@ SQL;
      */
     public function test_method_find()
     {
-        $task = $this->repository->find(1);
+        $task_id = new TaskId(1);
+        $task = $this->repository->find($task_id);
         $this->assertInstanceOf(TaskInterface::class, $task);
         $this->assertSame(1, $task->id());
         $this->assertSame('title1', $task->title());
@@ -90,8 +95,9 @@ SQL;
      */
     public function test_method_find_throw_SpecifiedTaskNotFoundException()
     {
+        $task_id = new TaskId(255);
         try {
-            $this->repository->find(255);
+            $this->repository->find($task_id);
         } catch (SpecifiedTaskNotFoundException $ex) {
             $this->assertSame(255, $ex->getSpecifiedId());
         }
@@ -127,19 +133,19 @@ Array
 
 EOF;
 
+        $task_id = new TaskId(1);
         $this->pdo_statement->method('fetchAll')
             ->willReturn($array);
         $this->pdo_mock->method('prepare')
             ->willReturn($this->pdo_statement);
         $repository = new TaskRepository($this->pdo_mock);
         try {
-            $repository->find(1);
+            $repository->find($task_id);
         } catch (PdoReturnUnexpectedValueException $ex) {
             $this->assertSame($logging_message, $ex->getLoggingMessage());
         }
     }
 
-    /** @noinspection PhpUnhandledExceptionInspection */
     public function test_method_find_throw_PdoReturnUnexpectedValueException_パラメタが見つからなかった()
     {
         $array = [
@@ -161,20 +167,19 @@ Array
 )
 
 EOF;
-
+        $task_id = new TaskId(1);
         $this->pdo_statement->method('fetchAll')
             ->willReturn($array);
         $this->pdo_mock->method('prepare')
             ->willReturn($this->pdo_statement);
         $repository = new TaskRepository($this->pdo_mock);
         try {
-            $repository->find(1);
+            $repository->find($task_id);
         } catch (PdoReturnUnexpectedValueException $ex) {
             $this->assertSame($logging_message, $ex->getLoggingMessage());
         }
     }
 
-    /** @noinspection PhpUnhandledExceptionInspection */
     public function test_method_find_throw_PdoReturnUnexpectedValueException_idの値が不正()
     {
         $array = [
@@ -197,22 +202,19 @@ Array
 
 EOF;
 
+        $task_id = new TaskId(1);
         $this->pdo_statement->method('fetchAll')
             ->willReturn($array);
         $this->pdo_mock->method('prepare')
             ->willReturn($this->pdo_statement);
         $repository = new TaskRepository($this->pdo_mock);
         try {
-            $repository->find(1);
+            $repository->find($task_id);
         } catch (PdoReturnUnexpectedValueException $ex) {
             $this->assertSame($logging_message, $ex->getLoggingMessage());
         }
     }
 
-    /**
-     * @throws TaskValidateException
-     * @throws SpecifiedTaskNotFoundException
-     */
     public function test_method_save()
     {
         $this->clean();
@@ -222,7 +224,8 @@ EOF;
         $this->task->method('title')
             ->willReturn('title1');
         $this->repository->save($this->task);
-        $ret = $this->repository->find(1);
+        $task_id = new TaskId(1);
+        $ret = $this->repository->find($task_id);
         $this->assertSame(1, $ret->id());
     }
 
@@ -271,6 +274,18 @@ EOF;
         $this->assertCount(2, $list);
     }
 
+    public function test_method_delete()
+    {
+        $task_id = new TaskId(1);
+        $this->repository->delete($task_id);
+        try {
+            $this->repository->find($task_id);
+            $this->fail('must raise exception');
+        } catch (SpecifiedTaskNotFoundException) {
+            $this->assertTrue(true);
+        }
+    }
+
     protected function tearDown(): void
     {
         parent::tearDown();
@@ -281,7 +296,7 @@ EOF;
     /**
      * sequenceによって変える値は変わるので、単にintが変えることのみテストする
      */
-    public function test_method_getNextValueInSequense()
+    public function test_method_getNextValueInSequence()
     {
         $this->assertIsInt($this->repository->getNextValueInSequence());
     }
