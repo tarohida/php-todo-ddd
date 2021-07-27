@@ -104,11 +104,24 @@ try {
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 $app->addRoutingMiddleware();
+
 $app->redirect('/', 'tasks');
 $app->get('/tasks', ListTaskControllerInterface::class);
 $app->post('/api/tasks/create', TaskCreateControllerInterface::class);
 $app->get('/api/tasks', ListTaskApiControllerInterface::class);
 $app->delete('/api/tasks/{id}', DeleteTaskApiControllerInterface::class);
+$app->options('/{routes:.+}', function ($request, $response) {
+    return $response;
+});
+
+$app->add(function ($request, $handler) {
+    $response = $handler->handle($request);
+    return $response
+        ->withHeader('Access-Control-Allow-Origin', 'http://localhost:8080')
+        ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+});
+
 
 $displayErrorDetails = true;
 
