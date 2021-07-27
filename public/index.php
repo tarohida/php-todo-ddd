@@ -9,8 +9,6 @@ use App\Application\Controller\Http\Api\TaskCreateController;
 use App\Application\Controller\Http\Api\TaskCreateControllerInterface;
 use App\Application\Controller\Http\Api\DeleteTaskApiController;
 use App\Application\Controller\Http\Api\DeleteTaskApiControllerInterface;
-use App\Application\Controller\Http\ListTaskController;
-use App\Application\Controller\Http\ListTaskControllerInterface;
 use App\Application\Controller\Http\Handler\HttpErrorHandler;
 use App\Application\Controller\Http\Handler\ShutdownHandler;
 use App\Domain\Task\DeleteTaskService;
@@ -32,8 +30,6 @@ use Slim\Factory\AppFactory;
 use Slim\Factory\ServerRequestCreatorFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
-
-const PROJECT_ROOT_PATH = __DIR__ . '/../';
 
 $container = new Container();
 $container->set(PDO::class, function () {
@@ -76,10 +72,6 @@ $container->set(ListTaskApiControllerInterface::class, function (ContainerInterf
     return new ListTaskApiController($repository);
 });
 
-$container->set(ListTaskControllerInterface::class, function () {
-    return new ListTaskController();
-});
-
 $container->set(DeleteTaskApiControllerInterface::class, function (ContainerInterface $c) {
     $service = $c->get(DeleteTaskServiceInterface::class);
     return new DeleteTaskApiController($service);
@@ -105,8 +97,7 @@ AppFactory::setContainer($container);
 $app = AppFactory::create();
 $app->addRoutingMiddleware();
 
-$app->redirect('/', 'tasks');
-$app->get('/tasks', ListTaskControllerInterface::class);
+$app->redirect('/', '/api/tasks');
 $app->post('/api/tasks/create', TaskCreateControllerInterface::class);
 $app->get('/api/tasks', ListTaskApiControllerInterface::class);
 $app->delete('/api/tasks/{id}', DeleteTaskApiControllerInterface::class);
