@@ -1,57 +1,54 @@
 <?php
-
+/** @noinspection NonAsciiCharacters */
+/** @noinspection PhpUnhandledExceptionInspection */
+/** @noinspection PhpDocMissingThrowsInspection */
+declare(strict_types=1);
 
 namespace Tests\Domain\Task;
 
-
-use App\Domain\Task\Task;
-use App\Domain\Task\TaskInterface;
+use App\Domain\Task\Exception\SpecifiedTaskNotFoundException;
+use App\Domain\Task\TaskId;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Domain\Task\TaskService;
 use App\Domain\Task\TaskServiceInterface;
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Class TaskServiceTest
+ * @package Tests\Domain\Task
+ */
 class TaskServiceTest extends TestCase
 {
-    /**
-     * @var TaskRepositoryInterface|MockObject
-     */
-    private $repository;
+    private TaskRepositoryInterface|Stub $repository;
+    private TaskService $service;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
-
+        parent::setUp();
         $this->repository = $this->createStub(TaskRepositoryInterface::class);
-    }
-
-    public function test_construct()
-    {
-        $this->assertInstanceOf(TaskService::class, new TaskService($this->repository));
+        $this->service = new TaskService($this->repository);
     }
 
     public function test_implements_TaskServiceInterface()
     {
-        $this->assertInstanceOf(TaskServiceInterface::class, new TaskService($this->repository));
-    }
-    /**
-     * @dataProvider boolProvider
-     * @param TaskInterface $input_task
-     * @param TaskInterface|null $output_task
-     * @param bool $expected
-     */
-    public function test_exists(TaskInterface $input_task, ?TaskInterface $output_task, bool $expected)
-    {
-        $this->repository->method('find')->willReturn($output_task);
-        $task_service = new TaskService($this->repository);
-        $this->assertSame($expected, $task_service->exists($input_task));
+        $this->assertInstanceOf(TaskServiceInterface::class, $this->service);
     }
 
-    public function boolProvider(): array
+    public function test_method_exists_return_true()
     {
-        return [
-            [new Task(1, 'title'), new Task(1, 'title'), true],
-            [new Task(1, 'title'), null, false]
-        ];
+        $task_id = new TaskId(1);
+        $service = new TaskService($this->repository);
+        $this->assertSame(true, $service->taskExists($task_id));
+    }
+
+    public function test_method_exists_return_false()
+    {
+        $task_id = new TaskId(1);
+        $ex = new SpecifiedTaskNotFoundException($task_id->getId());
+        $this->repository->method('find')
+            ->willThrowException($ex);
+        $service = new TaskService($this->repository);
+        $this->assertSame(false, $service->taskExists($task_id));
     }
 }

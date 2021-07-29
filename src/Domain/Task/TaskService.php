@@ -1,28 +1,34 @@
 <?php
+declare(strict_types=1);
 
 
 namespace App\Domain\Task;
 
 
+use App\Domain\Task\Exception\SpecifiedTaskNotFoundException;
+
+/**
+ * Class TaskService
+ * @package App\Domain\Task
+ */
 class TaskService implements TaskServiceInterface
 {
-    /**
-     * @var TaskRepositoryInterface
-     */
-    private TaskRepositoryInterface $repository;
-
-    public function __construct(TaskRepositoryInterface $repository)
-    {
-        $this->repository = $repository;
-    }
 
     /**
-     * @param TaskInterface $task
-     * @return bool
+     * TaskService constructor.
+     * @param TaskRepositoryInterface $repository
      */
-    public function exists(TaskInterface $task): bool
+    public function __construct(
+        private TaskRepositoryInterface $repository
+    ){}
+
+    public function taskExists(TaskId $id): bool
     {
-        $task = $this->repository->find($task->id());
-        return !is_null($task);
+        try {
+            $this->repository->find($id);
+            return true;
+        } catch (SpecifiedTaskNotFoundException) {
+            return false;
+        }
     }
 }

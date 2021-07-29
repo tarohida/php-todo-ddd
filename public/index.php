@@ -1,31 +1,25 @@
 <?php
 declare(strict_types=1);
 
-use App\Application\Actions\Task\CreateTaskAction;
-use App\Application\Actions\Task\CreateTaskActionInterface;
-use App\Application\Actions\Task\DeleteTaskAction;
-use App\Application\Actions\Task\DeleteTaskActionInterface;
-use App\Application\Actions\Task\ListTasksAction;
-use App\Application\Actions\Task\ListTasksActionInterface;
-use App\Application\Actions\Task\ViewTaskAction;
-use App\Application\Actions\Task\ViewTaskActionInterface;
-use App\Application\Controllers\Http\CreateTaskController;
-use App\Application\Controllers\Http\CreateTaskControllerInterface;
-use App\Application\Controllers\Http\CreateTaskFormController;
-use App\Application\Controllers\Http\CreateTaskFormControllerInterface;
-use App\Application\Controllers\Http\DeleteTaskController;
-use App\Application\Controllers\Http\DeleteTaskControllerInterface;
-use App\Application\Controllers\Http\DeleteTaskFormController;
-use App\Application\Controllers\Http\DeleteTaskFormControllerInterface;
-use App\Application\Controllers\Http\ListTasksController;
-use App\Application\Controllers\Http\ListTasksControllerInterface;
-use App\Application\Controllers\Http\ViewTaskController;
-use App\Application\Controllers\Http\ViewTaskControllerInterface;
+use App\Application\Action\TaskCreateAction;
+use App\Application\Action\TaskCreateActionInterface;
+use App\Application\Controller\Http\Api\ListTaskApiController;
+use App\Application\Controller\Http\Api\ListTaskApiControllerInterface;
+use App\Application\Controller\Http\Api\TaskCreateController;
+use App\Application\Controller\Http\Api\TaskCreateControllerInterface;
+use App\Application\Controller\Http\Api\DeleteTaskApiController;
+use App\Application\Controller\Http\Api\DeleteTaskApiControllerInterface;
+use App\Application\Controller\Http\Handler\HttpErrorHandler;
+use App\Application\Controller\Http\Handler\ShutdownHandler;
+use App\Domain\Task\DeleteTaskService;
+use App\Domain\Task\DeleteTaskServiceInterface;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Domain\Task\TaskService;
 use App\Domain\Task\TaskServiceInterface;
 use App\Infrastructure\Task\TaskRepository;
 use DI\Container;
+use DI\DependencyException;
+use DI\NotFoundException;
 use eftec\bladeone\BladeOne;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
@@ -33,31 +27,54 @@ use Monolog\Logger;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Slim\Factory\AppFactory;
+use Slim\Factory\ServerRequestCreatorFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
 
 $container = new Container();
-$container->set(PDO::class, function(){
-    $db_host = 'db';
-    $db_name = 'db_name';
-    $db_user = 'db_user';
-    $db_password = 'db_password';
+$container->set(PDO::class, function () {
     return new PDO(
-        "pgsql:host=${db_host};dbname=${db_name};",
-        $db_user,
-        $db_password,
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        sprintf('pgsql:host=%s;dbname=%s', 'db', 'db_name'),
+        'db_user',
+        'db_password'
     );
 });
-$container->set(TaskRepositoryInterface::class, function (ContainerInterface $container) {
-    $pdo = $container->get(PDO::class);
+$container->set(BladeOne::class, function () {
+    return new BladeOne(__DIR__.'/../views',__DIR__.'/../compiles');
+});
+$container->set(TaskRepositoryInterface::class, function (ContainerInterface $c) {
+    $pdo = $c->get(PDO::class);
     return new TaskRepository($pdo);
 });
 
-$container->set(BladeOne::class, function (){
-    $views = __DIR__ . '/../views';
-    $cache = __DIR__ . '/../cache';
-    return new BladeOne($views, $cache, BladeOne::MODE_AUTO);
+$container->set(TaskServiceInterface::class, function (ContainerInterface $c) {
+    $repository = $c->get(TaskRepositoryInterface::class);
+    return new TaskService($repository);
+});
+
+$container->set(TaskCreateActionInterface::class, function (ContainerInterface $c){
+    $repository = $c->get(TaskRepositoryInterface::class);
+    return new TaskCreateAction($repository);
+});
+
+$container->set(DeleteTaskServiceInterface::class, function (ContainerInterface $c) {
+    $repository = $c->get(TaskRepositoryInterface::class);
+    return new DeleteTaskService($repository);
+});
+
+$container->set(TaskCreateControllerInterface::class, function (ContainerInterface $c) {
+    $action = $c->get(TaskCreateActionInterface::class);
+    return new TaskCreateController($action);
+});
+
+$container->set(ListTaskApiControllerInterface::class, function (ContainerInterface $c) {
+    $repository = $c->get(TaskRepositoryInterface::class);
+    return new ListTaskApiController($repository);
+});
+
+$container->set(DeleteTaskApiControllerInterface::class, function (ContainerInterface $c) {
+    $service = $c->get(DeleteTaskServiceInterface::class);
+    return new DeleteTaskApiController($service);
 });
 
 $container->set(LoggerInterface::class, function () {
@@ -70,77 +87,44 @@ $container->set(LoggerInterface::class, function () {
     return $logger;
 });
 
-$container->set(TaskServiceInterface::class, function (ContainerInterface $container) {
-    $db = $container->get(TaskRepositoryInterface::class);
-    return new TaskService($db);
-});
-
-$container->set(ViewTaskActionInterface::class, function (ContainerInterface $container) {
-    $db = $container->get(TaskRepositoryInterface::class);
-    $service = $container->get(TaskServiceInterface::class);
-    return new ViewTaskAction($db, $service);
-});
-
-$container->set(ListTasksActionInterface::class, function (ContainerInterface $container) {
-    $repository = $container->get(TaskRepositoryInterface::class);
-    $service = $container->get(TaskServiceInterface::class);
-    return new ListTasksAction($repository, $service);
-});
-
-$container->set(CreateTaskActionInterface::class, function (ContainerInterface $container) {
-    $repository = $container->get(TaskRepositoryInterface::class);
-    $service = $container->get(TaskServiceInterface::class);
-    return new CreateTaskAction($repository, $service);
-});
-
-$container->set(DeleteTaskActionInterface::class, function (ContainerInterface $container) {
-    $repository = $container->get(TaskRepositoryInterface::class);
-    return new DeleteTaskAction($repository);
-});
-
-$container->set(ViewTaskControllerInterface::class, function (ContainerInterface $container) {
-    $action = $container->get(ViewTaskActionInterface::class);
-    return new ViewTaskController($action);
-});
-
-$container->set(ListTasksControllerInterface::class, function (ContainerInterface $container) {
-    $action = $container->get(ListTasksActionInterface::class);
-    return new ListTasksController($action);
-});
-
-$container->set(CreateTaskControllerInterface::class, function (ContainerInterface $container) {
-    $action = $container->get(CreateTaskActionInterface::class);
-    return new CreateTaskController($action);
-});
-
-$container->set(CreateTaskFormControllerInterface::class, function (ContainerInterface $container) {
-    $blade = $container->get(BladeOne::class);
+try {
     $logger = $container->get(LoggerInterface::class);
-    return new CreateTaskFormController($blade, $logger);
-});
-
-$container->set(DeleteTaskFormControllerInterface::class, function (ContainerInterface $container) {
-    $view = $container->get(BladeOne::class);
-    $logger = $container->get(LoggerInterface::class);
-    return new DeleteTaskFormController($view, $logger);
-});
-
-$container->set(DeleteTaskControllerInterface::class, function (ContainerInterface $container) {
-    $action = $container->get(DeleteTaskActionInterface::class);
-    return new DeleteTaskController($action);
-});
+} catch (DependencyException | NotFoundException $e) {
+    die('container error');
+}
 
 AppFactory::setContainer($container);
-
 $app = AppFactory::create();
+$app->addRoutingMiddleware();
 
-$app->redirect('/', '/tasks');
-$app->get('/tasks', ListTasksControllerInterface::class);
-$app->get('/tasks/create', CreateTaskFormControllerInterface::class);
-$app->get('/tasks/delete', DeleteTaskFormControllerInterface::class);
-$app->get('/tasks/{id}', ViewTaskControllerInterface::class);
-$app->post('/tasks/{id}', CreateTaskControllerInterface::class);
-$app->delete('/tasks/{id}', DeleteTaskControllerInterface::class);
+$app->redirect('/', '/api/tasks');
+$app->post('/api/tasks/create', TaskCreateControllerInterface::class);
+$app->get('/api/tasks', ListTaskApiControllerInterface::class);
+$app->delete('/api/tasks/{id}', DeleteTaskApiControllerInterface::class);
+$app->options('/{routes:.+}', function ($request, $response) {
+    return $response;
+});
 
+$app->add(function ($request, $handler) {
+    $response = $handler->handle($request);
+    return $response
+        ->withHeader('Access-Control-Allow-Origin', 'http://localhost:8080')
+        ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+});
+
+
+$displayErrorDetails = true;
+
+$callableResolver = $app->getCallableResolver();
+$responseFactory = $app->getResponseFactory();
+
+$serverRequestCreator = ServerRequestCreatorFactory::create();
+$request = $serverRequestCreator->createServerRequestFromGlobals();
+
+$errorHandler = new HttpErrorHandler($callableResolver, $responseFactory, $logger);
+$shutdownHandler = new ShutdownHandler($request, $errorHandler, $displayErrorDetails);
+register_shutdown_function($shutdownHandler);
+$errorMiddleware = $app->addErrorMiddleware($displayErrorDetails, false, false);
+$errorMiddleware->setDefaultErrorHandler($errorHandler);
 $app->run();
-

@@ -1,16 +1,35 @@
 <?php
+declare(strict_types=1);
 
 
 namespace App\Domain\Task;
 
 
+use App\Domain\Task\Exception\SpecifiedTaskNotFoundException;
+
+/**
+ * Interface TaskRepositoryInterface
+ * @package App\Domain\Task
+ */
 interface TaskRepositoryInterface
 {
-    public function find(int $task_id): ?TaskInterface;
+    /**
+     * @param TaskId $task_id
+     * @return TaskInterface
+     * @throws SpecifiedTaskNotFoundException
+     */
+    public function find(TaskId $task_id): TaskInterface;
+    public function list(): TaskIteratorInterface;
 
-    public function list(): ?TaskListInterface;
-
+    /**
+     * @param TaskInterface $task
+     * @return mixed
+     */
     public function save(TaskInterface $task): void;
 
-    public function delete(int $task_id): void;
+    /**
+     * @param TaskId $task_id
+     */
+    public function delete(TaskId $task_id): void;
+    public function getNextValueInSequence(): int;
 }

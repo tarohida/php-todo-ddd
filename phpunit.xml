@@ -1,13 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<phpunit colors="true"
-         verbose="true">
- <testsuite name="PHP TODO TEST">
-  <directory>./tests</directory>
- </testsuite>
- <php>
- <env name="DB_HOST" value="db"/>
- <env name="DB_NAME" value="db_name"/>
- <env name="DB_USER" value="db_user"/>
- <env name="DB_PASSWORD" value="db_password"/>
- </php>
+<phpunit>
+    <testsuite name="todo app test">
+        <directory>./tests</directory>
+    </testsuite>
+    <php>
+        <env name="db_host" value="db" />
+        <env name="db_name" value="db_name" />
+        <env name="db_user" value="db_user" />
+        <env name="db_password" value="db_password" />
+    </php>
 </phpunit>

@@ -1,100 +1,151 @@
 <?php
+declare(strict_types=1);
 
 
 namespace App\Infrastructure\Task;
 
 
+use App\Domain\Task\Exception\SpecifiedTaskNotFoundException;
+use App\Domain\Task\Exception\TaskValidateException;
+use App\Domain\Task\Exception\Validate\TaskIdMustBePositiveNumberException;
+use App\Domain\Task\Exception\Validate\TaskTitleMustNotEmptyException;
 use App\Domain\Task\Task;
-
+use App\Domain\Task\TaskId;
 use App\Domain\Task\TaskInterface;
-use App\Domain\Task\TaskList;
-use App\Domain\Task\TaskListInterface;
+use App\Domain\Task\TaskIterator;
+use App\Domain\Task\TaskIteratorInterface;
 use App\Domain\Task\TaskRepositoryInterface;
-use App\Exeption\Infrastructure\Task\DuplicatedTaskException;
-use UnexpectedValueException;
+use App\Infrastructure\Pdo\Exception\NotAffectedException;
+use App\Infrastructure\Pdo\Exception\PdoReturnUnexpectedValueException;
+use App\Infrastructure\Pdo\Exception\TooAffectedException;
 use PDO;
 
+/**
+ * Class TaskRepository
+ * @package App\Infrastructure\Task
+ */
 class TaskRepository implements TaskRepositoryInterface
 {
-
-    private PDO $pdo;
-
-    public function __construct(PDO $pdo)
-    {
-        $this->pdo = $pdo;
-    }
+    public function __construct(
+        protected PDO $pdo
+    ) {}
 
     /**
-     * @param int $task_id
-     * @return TaskInterface|null
-     * @throws DuplicatedTaskException
-     * @throws UnexpectedValueException
+     * @param TaskId $task_id
+     * @return TaskInterface
+     * @throws SpecifiedTaskNotFoundException
      */
-    public function find(int $task_id): ?TaskInterface
+    public function find(TaskId $task_id): TaskInterface
     {
-        $query = <<< SQL
-SELECT * from tasks
-where id = :task_id
-SQL;
-
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindValue(':task_id', $task_id);
-        $stmt->execute();
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        if (empty($result)) {
-            return null;
-        }
-        if (count($result) >= 2) {
-            // Task must not be duplicated.
-            throw new DuplicatedTaskException("task_id: $task_id");
-        }
-        if (isset($result[0]['id']) && isset($result[0]['title'])) {
-            return new Task($result[0]['id'], $result[0]['title']);
-        }
-        throw new UnexpectedValueException('PDO response format is unexpected.');
-    }
-
-    public function list(): TaskListInterface
-    {
-        $query = <<< SQL
-SELECT * from tasks
-SQL;
-        $stmt = $this->pdo->prepare($query);
-        $stmt->execute();
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $task_array = [];
-        foreach ($result as $task) {
-            if (!isset($task['id']) || !isset($task['title'])) {
-                throw new UnexpectedValueException('PDO response format is unexpected.');
-            }
-            $task_array[] = new Task($task['id'], $task['title']);
-        }
-        return new TaskList($task_array);
-    }
-
-    public function save(TaskInterface $task): void
-    {
-        $query = <<< SQL
-INSERT INTO tasks (id, title) VALUES (:id, :title)
-SQL;
-        $pdo_statement = $this->pdo->prepare($query);
-        $id = $task->id();
-        $title = $task->title();
-        $pdo_statement->bindParam(':id', $id, PDO::PARAM_INT);
-        $pdo_statement->bindParam('title', $title, PDO::PARAM_STR);
-        $pdo_statement->execute();
-    }
-
-    public function delete(int $task_id): void
-    {
-        $query = <<< SQL
-DELETE from tasks
+        $query = <<<SQL
+select id, title from tasks
 where id = :id
 SQL;
         $pdo_statement = $this->pdo->prepare($query);
-        $pdo_statement->bindParam(':id', $task_id, PDO::PARAM_INT);
+        $pdo_statement->bindValue(':id', $task_id->getId());
         $pdo_statement->execute();
+        $params = $pdo_statement->fetchAll(PDO::FETCH_ASSOC);
+        if (count($params) === 0) {
+            throw new SpecifiedTaskNotFoundException($task_id->getId());
+        }
+        if (count($params) != 1) {
+            throw new PdoReturnUnexpectedValueException($params, [$task_id->getId()]);
+        }
+        if (!isset($params[0]['id']) || !isset($params[0]['title'])) {
+            throw new PdoReturnUnexpectedValueException($params, [$task_id->getId()]);
+        }
+        $id = $params[0]['id'];
+        $title = $params[0]['title'];
+        if (!is_numeric($id)) {
+            throw new PdoReturnUnexpectedValueException($params, [$task_id->getId()]);
+        }
+        try {
+            return new Task((int)$id, $title);
+        } catch (TaskIdMustBePositiveNumberException | TaskTitleMustNotEmptyException $e) {
+            throw new PdoReturnUnexpectedValueException($params, [$task_id->getId()], $e);
+        }
+    }
 
+    public function list(): TaskIteratorInterface
+    {
+        $query = <<<'SQL'
+select id ,title from tasks
+SQL;
+        $pdo_statement = $this->pdo->prepare($query);
+        $pdo_statement->execute();
+        $data_set = $pdo_statement->fetchAll(PDO::FETCH_ASSOC);
+        $tasks = [];
+        foreach ($data_set as $data) {
+            if (!isset($data['id']) || !isset($data['title'])) {
+                throw new PdoReturnUnexpectedValueException($data_set, []);
+            }
+            if (!is_numeric($data['id'])) {
+                throw new PdoReturnUnexpectedValueException($data_set, []);
+            }
+            try {
+                $tasks[] = new Task((int)$data['id'], $data['title']);
+            } catch (TaskValidateException $e) {
+                throw new PdoReturnUnexpectedValueException($data_set, [], previous: $e);
+            }
+        }
+        return new TaskIterator($tasks);
+
+    }
+
+    /**
+     * @param TaskInterface $task
+     */
+    public function save(TaskInterface $task): void
+    {
+        $sql = <<<'SQL'
+insert into tasks
+(id, title) values 
+(:id, :title)
+SQL;
+        $statement = $this->pdo->prepare($sql);
+        $statement->bindValue(':id', $task->id());
+        $statement->bindValue(':title', $task->title());
+        $statement->execute();
+        $affected_row_count = $statement->rowCount();
+        if ($affected_row_count === 0) {
+            throw new NotAffectedException([$task->id(), $task->title()]);
+        }
+        if ($affected_row_count !== 1) {
+            throw new TooAffectedException([$task->id(), $task->title()], $affected_row_count);
+        }
+    }
+
+    /**
+     * @param TaskId $task_id
+     */
+    public function delete(TaskId $task_id): void
+    {
+        $sql = <<<'SQL'
+delete from tasks
+where id = :id
+SQL;
+        $pdo_statement = $this->pdo->prepare($sql);
+        $pdo_statement->bindValue(':id', $task_id->getId());
+        $pdo_statement->execute();
+        if ($pdo_statement->rowCount() > 1) {
+            throw new TooAffectedException([], $pdo_statement->rowCount());
+        }
+    }
+
+    public function getNextValueInSequence(): int
+    {
+        $query = <<<'SQL'
+select nextval('tasks_id_seq')
+SQL;
+        $pdo_statement = $this->pdo->prepare($query);
+        $pdo_statement->execute();
+        $data_set = $pdo_statement->fetchAll(PDO::FETCH_ASSOC);
+        if (count($data_set) !== 1 ||
+            !isset($data_set[0]['nextval']) ||
+            !is_numeric($data_set[0]['nextval']))
+        {
+            throw new PdoReturnUnexpectedValueException($data_set, []);
+        }
+        return (int)$data_set[0]['nextval'];
     }
 }
