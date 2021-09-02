@@ -8,18 +8,20 @@ declare(strict_types=1);
 namespace Tests\Domain\Task;
 
 use App\Domain\Task\ListTaskService;
+use App\Domain\Task\TaskRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 
 class ListTaskServiceTest extends TestCase
 {
-    protected function setUp(): void
+    public function test_method_list()
     {
-        parent::setUp();
+        $repository = $this->getTaskRepositoryMock();
+        $service = new ListTaskService($repository);
+        $this->assertInstanceOf(ListTaskService::class, $service);
     }
 
-    public function test_method_construct()
+    private function getTaskRepositoryMock()
     {
-        $service = new ListTaskService();
-        $this->assertInstanceOf(ListTaskService::class, $service);
+        return $this->createMock(TaskRepositoryInterface::class);
     }
 }

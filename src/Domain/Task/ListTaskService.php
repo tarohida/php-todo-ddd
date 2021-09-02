@@ -5,7 +5,7 @@ namespace App\Domain\Task;
 
 class ListTaskService
 {
-    public function __construct()
-    {
-    }
+    public function __construct(
+        private TaskRepositoryInterface $repository
+    ) { }
 }
