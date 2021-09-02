@@ -8,4 +8,9 @@ class ListTaskService
     public function __construct(
         private TaskRepositoryInterface $repository
     ) { }
+
+    public function list(): TaskList
+    {
+        return $this->repository->list();
+    }
 }
