@@ -7,26 +7,26 @@ class TaskList implements \Iterator
 {
     public function current()
     {
-        // TODO: Implement current() method.
+        throw new \LogicException();
     }
 
     public function next()
     {
-        // TODO: Implement next() method.
+        throw new \LogicException();
     }
 
     public function key()
     {
-        // TODO: Implement key() method.
+        throw new \LogicException();
     }
 
     public function valid()
     {
-        // TODO: Implement valid() method.
+        throw new \LogicException();
     }
 
     public function rewind()
     {
-        // TODO: Implement rewind() method.
+        throw new \LogicException();
     }
 }
