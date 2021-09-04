@@ -10,8 +10,7 @@
         }
     ],
     "require": {
-        "ext-pdo": "*",
-        "byjg/migration-cli": "4.1.*"
+        "ext-pdo": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5"
