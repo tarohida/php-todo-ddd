@@ -27,6 +27,10 @@
         }
     },
     "scripts": {
-        "test": "vendor/bin/phpunit"
+        "test": "vendor/bin/phpunit",
+        "phinx_create_table": "vendor/bin/phinx create CreateTaskTable",
+        "fix_owner": "chown -R 1000.1000 ./db",
+        "migrate": "vendor/bin/phinx migrate",
+        "rollback": "vendor/bin/phinx rollback"
     }
 }
