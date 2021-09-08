@@ -18,7 +18,8 @@ class TaskRepositoryTest extends TestCase
 {
     public function test_method_construct()
     {
-        $repository = new TaskRepository();
+        $pdo = $this->createMock(\PDO::class);
+        $repository = new TaskRepository($pdo);
         $this->assertInstanceOf(TaskRepository::class, $repository);
     }
 }
