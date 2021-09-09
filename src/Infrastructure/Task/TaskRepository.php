@@ -6,7 +6,6 @@ namespace App\Infrastructure\Task;
 use App\Domain\Task\TaskList;
 use App\Infrastructure\Pdo\Exception\PdoReturnUnexpectedResultException;
 use PDO;
-use RuntimeException;
 
 class TaskRepository
 {
@@ -28,8 +27,8 @@ SQL;
         foreach ($data_set as $data) {
              try {
                  $tasks[] = Task::createFromPdoDataSet($data);
-             } catch (RuntimeException) {
-                 throw new PdoReturnUnexpectedResultException(data_set:$data_set);
+             } catch (Exception\TaskValidateException $e) {
+                 throw new PdoReturnUnexpectedResultException(previous: $e, data_set:$data_set);
              }
         }
         return new TaskList($tasks);

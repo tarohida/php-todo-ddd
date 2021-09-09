@@ -3,17 +3,20 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Task;
 
-use RuntimeException;
+use App\Infrastructure\Task\Exception\TaskValidateException;
 
 class Task
 {
-    public static function createFromPdoDataSet(array $data)
+    /**
+     * @throws TaskValidateException
+     */
+    public static function createFromPdoDataSet(array $data): Task
     {
         if (!isset($data['id'], $data['title'])) {
-            throw new RuntimeException();
+            throw new TaskValidateException();
         }
         if (!is_numeric($data['id'])) {
-            throw new RuntimeException();
+            throw new TaskValidateException();
         }
         return new self((int)$data['id'], $data['title']);
     }
