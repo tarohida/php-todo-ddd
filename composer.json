@@ -14,7 +14,8 @@
         "robmorgan/phinx": "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "*"
+        "phpunit/phpunit": "*",
+        "guzzlehttp/guzzle": "*"
     },
     "autoload": {
         "psr-4": {
