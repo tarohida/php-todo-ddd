@@ -18,12 +18,17 @@ class GetTasksTest extends TestCase
 {
     public function test_get()
     {
+        $response = $this->getResponse();
+        self::assertSame(404, $response->getStatusCode());
+    }
+
+    private function getResponse()
+    {
         $client = new Client();
         try {
-            $client->request('GET', 'http://web/tasks');
+            return $client->request('GET', 'http://web/tasks');
         } catch (ClientException $e) {
-            $response = $e->getResponse();
-            self::assertSame(404, $response->getStatusCode());
+            return $e->getResponse();
         }
     }
 }
