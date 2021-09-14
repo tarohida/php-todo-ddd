@@ -19,7 +19,7 @@ class GetTasksTest extends TestCase
     public function test_get()
     {
         $response = $this->getResponse();
-        self::assertSame(404, $response->getStatusCode());
+        self::assertSame(200, $response->getStatusCode());
     }
 
     private function getResponse()
