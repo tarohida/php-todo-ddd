@@ -12,7 +12,8 @@
     "require": {
         "ext-pdo": "*",
         "robmorgan/phinx": "*",
-        "slim/slim": "*"
+        "slim/slim": "*",
+        "slim/psr7": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "*",
