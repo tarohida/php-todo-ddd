@@ -13,7 +13,8 @@
         "ext-pdo": "*",
         "robmorgan/phinx": "*",
         "slim/slim": "*",
-        "slim/psr7": "*"
+        "slim/psr7": "*",
+        "monolog/monolog": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "*",
