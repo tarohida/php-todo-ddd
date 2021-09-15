@@ -14,4 +14,6 @@ $app->get('/', function (Request $request, Response $response, $args) {
     return $response;
 });
 
+$errorMiddleware = $app->addErrorMiddleware(true, true, true);
+
 $app->run();
