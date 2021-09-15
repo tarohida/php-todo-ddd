@@ -1,6 +1,10 @@
-<?php
+<?php /** @noinspection PhpTooManyParametersInspection */
 declare(strict_types=1);
 
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
 use Slim\Factory\AppFactory;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
@@ -14,6 +18,10 @@ $app->get('/', function (Request $request, Response $response, $args) {
     return $response;
 });
 
-$errorMiddleware = $app->addErrorMiddleware(true, true, true);
+$logger = new Logger('app');
+$streamHandler = new StreamHandler('php://stdout');
+$logger->pushHandler($streamHandler);
+
+$errorMiddleware = $app->addErrorMiddleware(true, true, true, $logger);
 
 $app->run();
