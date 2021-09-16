@@ -14,7 +14,8 @@
         "robmorgan/phinx": "*",
         "slim/slim": "*",
         "slim/psr7": "*",
-        "monolog/monolog": "*"
+        "monolog/monolog": "*",
+        "php-di/php-di": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "*",
