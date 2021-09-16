@@ -1,18 +1,17 @@
 <?php
 declare(strict_types=1);
 
+use App\Application\Http\Controller\ListTaskController;
+use DI\Container;
 use Slim\Factory\AppFactory;
-use Slim\Psr7\Request;
-use Slim\Psr7\Response;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+$container = new Container();
+AppFactory::setContainer($container);
 $app = AppFactory::create();
 
-$app->get('/', function (Request $request, Response $response, $args) {
-    $response->getBody()->write('Hello world!');
-    return $response;
-});
+$app->get('/', ListTaskController::class);
 
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
