@@ -4,10 +4,11 @@ declare(strict_types=1);
 namespace App\Infrastructure\Task;
 
 use App\Domain\Task\TaskList;
+use App\Domain\Task\TaskRepositoryInterface;
 use App\Infrastructure\Pdo\Exception\PdoReturnUnexpectedResultException;
 use PDO;
 
-class TaskRepository
+class TaskRepository implements TaskRepositoryInterface
 {
     public function __construct(
         private PDO $pdo
