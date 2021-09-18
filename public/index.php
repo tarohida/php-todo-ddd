@@ -37,7 +37,7 @@ $container->set(ListTaskController::class, function (ContainerInterface $c) {
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 
-$app->get('/', ListTaskController::class);
+$app->get('/tasks', ListTaskController::class);
 
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
