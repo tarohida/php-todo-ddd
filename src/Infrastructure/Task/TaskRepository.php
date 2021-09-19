@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Task;
 
+use App\Domain\Task\Exception\TaskValidateException;
+use App\Domain\Task\Task;
 use App\Domain\Task\TaskList;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Infrastructure\Pdo\Exception\PdoReturnUnexpectedResultException;
@@ -28,7 +30,7 @@ SQL;
         foreach ($data_set as $data) {
              try {
                  $tasks[] = Task::createFromPdoDataSet($data);
-             } catch (Exception\TaskValidateException $e) {
+             } catch (TaskValidateException $e) {
                  throw new PdoReturnUnexpectedResultException(previous: $e, data_set:$data_set);
              }
         }
