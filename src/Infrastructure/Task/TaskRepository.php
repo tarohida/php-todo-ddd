@@ -36,4 +36,14 @@ SQL;
         }
         return new TaskList($tasks);
     }
+
+    public function save(Task $task): void
+    {
+        throw new \LogicException();
+    }
+
+    public function getSequence(): int
+    {
+        throw new \LogicException();
+    }
 }
