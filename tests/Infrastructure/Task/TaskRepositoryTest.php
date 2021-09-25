@@ -15,6 +15,7 @@ use App\Infrastructure\Task\TaskRepository;
 
 use PDO;
 use PDOStatement;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class TaskRepositoryTest extends TestCase
@@ -35,6 +36,19 @@ class TaskRepositoryTest extends TestCase
                 'title' => 'title3'
             ]
         ];
+        $pdo = $this->getPdoMock($data_set);
+        $repository = new TaskRepository($pdo);
+        $list = $repository->list();
+        self::assertInstanceOf(TaskList::class, $list);
+    }
+
+    public function test_method_save()
+    {
+        self::markTestSkipped();
+    }
+
+    private function getPdoMock(array $data_set): PDO|MockObject
+    {
         $statement = $this->createMock(PDOStatement::class);
         $statement->expects(self::once())
             ->method('fetchAll')
@@ -43,8 +57,6 @@ class TaskRepositoryTest extends TestCase
         $pdo->expects(self::once())
             ->method('prepare')
             ->willReturn($statement);
-        $repository = new TaskRepository($pdo);
-        $list = $repository->list();
-        self::assertInstanceOf(TaskList::class, $list);
+        return $pdo;
     }
 }
