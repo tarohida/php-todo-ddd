@@ -19,7 +19,7 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function list(): TaskList
     {
-        $sql = <<< 'SQL'
+        $sql = <<< SQL
 select id, title
 from tasks
 SQL;
@@ -39,7 +39,18 @@ SQL;
 
     public function save(Task $task): void
     {
-        throw new \LogicException();
+        $query = <<<SQL
+insert into tasks
+(id, title) values
+(:id, :title)
+SQL;
+        $statement = $this->pdo->prepare($query);
+        $statement->bindValue(':id', $task->id());
+        $statement->bindValue(':title', $task->title());
+        $statement->execute();
+        if ($statement->rowCount() !== 1) {
+            throw new PdoReturnUnexpectedResultException(data_set: [$statement->rowCount()]);
+        }
     }
 
     public function getSequence(): int
