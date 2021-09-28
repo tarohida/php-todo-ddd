@@ -7,5 +7,5 @@ interface TaskRepositoryInterface
 {
     public function list(): TaskList;
     public function save(Task $task): void;
-    public function getSequence(): int;
+    public function getNextValFromSequence(): int;
 }

@@ -53,8 +53,20 @@ SQL;
         }
     }
 
-    public function getSequence(): int
+    public function getNextValFromSequence(): int
     {
-        throw new \LogicException();
+        $query = <<<'SQL'
+select nextval('task_id_seq');
+SQL;
+        $pdo_statement = $this->pdo->prepare($query);
+        $pdo_statement->execute();
+        $data_set = $pdo_statement->fetchAll(PDO::FETCH_ASSOC);
+        if (!isset($data_set['nextval'])
+            || !is_numeric($data_set['nextval'])
+            || (int)$data_set['nextval'] < 0
+        ) {
+            throw new PdoReturnUnexpectedResultException(data_set: $data_set);
+        }
+        return (int)$data_set['nextval'];
     }
 }

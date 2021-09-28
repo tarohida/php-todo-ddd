@@ -8,7 +8,7 @@ class CreateTaskService
     public function serve(TaskTitle $title)
     {
         $task = new Task(
-            $this->repository->getSequence(),
+            $this->repository->getNextValFromSequence(),
             $title->title()
         );
         $this->repository->save($task);

@@ -38,7 +38,7 @@ class CreateTaskServiceTest extends TestCase
                     return $task->title() === $this->title_string;
                 })
             );
-        $repository->method('getSequence')
+        $repository->method('getNextValFromSequence')
             ->willReturn(1);
         $service = new CreateTaskService($repository);
         $service->serve($this->title);
