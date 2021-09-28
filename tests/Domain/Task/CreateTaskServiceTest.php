@@ -12,6 +12,7 @@ namespace Tests\Domain\Task;
 
 use App\Domain\Task\CreateTaskService;
 
+use App\Domain\Task\TaskId;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Domain\Task\TaskTitle;
 use PHPUnit\Framework\TestCase;
@@ -38,8 +39,9 @@ class CreateTaskServiceTest extends TestCase
                     return $task->title() === $this->title_string;
                 })
             );
-        $repository->method('getNextValFromSequence')
-            ->willReturn(1);
+        $task_id = new TaskId(1);
+        $repository->method('createTaskId')
+            ->willReturn($task_id);
         $service = new CreateTaskService($repository);
         $service->serve($this->title);
     }

@@ -50,14 +50,15 @@ class TaskRepositoryTest extends TestCase
         $repository->save($task);
     }
 
-    public function test_method_getNextValFromSequence()
+    public function test_method_getTaskIdFromSequence()
     {
         $data_set = [
             'nextval' => 1
         ];
         $pdo = $this->getPdoMockForFetch($data_set);
         $repository = new TaskRepository($pdo);
-        self::assertSame(1, $repository->getNextValFromSequence());
+        $task_id = $repository->createTaskId();
+        self::assertSame(1, $task_id->id());
     }
 
     private function getPdoMockForUpdate(): PDO|MockObject
