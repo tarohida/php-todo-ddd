@@ -8,9 +8,6 @@ use JetBrains\PhpStorm\Pure;
 
 class Task
 {
-    private TaskId $id;
-    private string $title;
-
     /**
      * @throws TaskValidateException
      */
@@ -22,22 +19,21 @@ class Task
         if (!is_numeric($data['id'])) {
             throw new TaskValidateException();
         }
-        return new self(new TaskId((int)$data['id']), $data['title']);
+        return new self(new TaskId((int)$data['id']), new TaskTitle($data['title']));
     }
 
-    public function __construct(TaskId $id, string $title)
-    {
-        $this->id = $id;
-        $this->title = $title;
-    }
+    public function __construct(
+        private TaskId $id,
+        private TaskTitle $title
+    ) { }
 
     #[Pure] public function id(): int
     {
         return $this->id->id();
     }
 
-    public function title(): string
+    #[Pure] public function title(): string
     {
-        return $this->title;
+        return $this->title->title();
     }
 }

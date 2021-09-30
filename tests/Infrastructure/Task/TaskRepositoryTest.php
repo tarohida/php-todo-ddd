@@ -13,6 +13,7 @@ namespace Tests\Infrastructure\Task;
 use App\Domain\Task\Task;
 use App\Domain\Task\TaskId;
 use App\Domain\Task\TaskList;
+use App\Domain\Task\TaskTitle;
 use App\Infrastructure\Task\TaskRepository;
 
 use PDO;
@@ -46,7 +47,7 @@ class TaskRepositoryTest extends TestCase
 
     public function test_method_save()
     {
-        $task = new Task(new TaskId(1), 'title1');
+        $task = new Task(new TaskId(1), new TaskTitle('title1'));
         $repository = new TaskRepository($this->getPdoMockForUpdate());
         $repository->save($task);
     }

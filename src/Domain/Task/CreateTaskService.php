@@ -7,10 +7,9 @@ class CreateTaskService
 {
     public function serve(TaskTitle $title)
     {
-        // todo: 呼び出し方を変更
         $task = new Task(
             $this->repository->createTaskId(),
-            $title->title()
+            $title
         );
         $this->repository->save($task);
     }
