@@ -12,6 +12,7 @@ namespace Tests\Domain\Task;
 
 use App\Domain\Task\Task;
 
+use App\Domain\Task\TaskId;
 use PHPUnit\Framework\TestCase;
 
 class TaskTest extends TestCase
@@ -25,7 +26,7 @@ class TaskTest extends TestCase
         parent::setUp();
         $this->id = 1;
         $this->title = 'title1';
-        $this->task = new Task($this->id, $this->title);
+        $this->task = new Task(new TaskId($this->id), $this->title);
     }
 
     public function test_method_id()

@@ -4,10 +4,11 @@ declare(strict_types=1);
 namespace App\Domain\Task;
 
 use App\Domain\Task\Exception\TaskValidateException;
+use JetBrains\PhpStorm\Pure;
 
 class Task
 {
-    private int $id;
+    private TaskId $id;
     private string $title;
 
     /**
@@ -21,18 +22,18 @@ class Task
         if (!is_numeric($data['id'])) {
             throw new TaskValidateException();
         }
-        return new self((int)$data['id'], $data['title']);
+        return new self(new TaskId((int)$data['id']), $data['title']);
     }
 
-    public function __construct(int $id, string $title)
+    public function __construct(TaskId $id, string $title)
     {
         $this->id = $id;
         $this->title = $title;
     }
 
-    public function id(): int
+    #[Pure] public function id(): int
     {
-        return $this->id;
+        return $this->id->id();
     }
 
     public function title(): string
