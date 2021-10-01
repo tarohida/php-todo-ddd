@@ -20,7 +20,7 @@ class GetTasksTest extends TestCase
 {
     public function test_get()
     {
-        $response = $this->getResponse();
+        $response = $this->getResponse('GET', '/tasks');
         self::assertSame(200, $response->getStatusCode());
     }
 
@@ -31,7 +31,7 @@ class GetTasksTest extends TestCase
         self::assertSame('Hello! post', (string)$response->getBody());
     }
 
-    private function getResponse(string $method='GET', string $path='/tasks'): ResponseInterface
+    private function getResponse(string $method, string $path): ResponseInterface
     {
         $client = new Client();
         try {
