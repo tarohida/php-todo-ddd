@@ -28,7 +28,11 @@ class GetTasksTest extends TestCase
     {
         $response = $this->getResponse('POST', '/tasks/create');
         self::assertSame(200, $response->getStatusCode());
-        self::assertSame('Hello! post', (string)$response->getBody());
+        $expected = <<<'JSON'
+{"task":{"1":"title1"}}
+JSON;
+
+        self::assertSame($expected, (string)$response->getBody());
     }
 
     private function getResponse(string $method, string $path): ResponseInterface
