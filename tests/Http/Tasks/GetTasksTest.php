@@ -24,11 +24,18 @@ class GetTasksTest extends TestCase
         self::assertSame(200, $response->getStatusCode());
     }
 
-    private function getResponse(): ResponseInterface
+    public function test_post_to_tasks_create()
+    {
+        $response = $this->getResponse('POST', '/tasks/create');
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('Hello! post', (string)$response->getBody());
+    }
+
+    private function getResponse(string $method='GET', string $path='/tasks'): ResponseInterface
     {
         $client = new Client();
         try {
-            return $client->request('GET', 'http://web/tasks');
+            return $client->request($method, 'http://web'.$path);
         } catch (ClientException $e) {
             return $e->getResponse();
         }

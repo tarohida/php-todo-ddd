@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+use App\Application\Http\Controller\CreateTaskController;
 use App\Application\Http\Controller\ListTaskController;
 use App\Domain\Task\ListTaskService;
 use App\Domain\Task\TaskRepositoryInterface;
@@ -38,6 +39,7 @@ AppFactory::setContainer($container);
 $app = AppFactory::create();
 
 $app->get('/tasks', ListTaskController::class);
+$app->post('/tasks/create', CreateTaskController::class);
 
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
