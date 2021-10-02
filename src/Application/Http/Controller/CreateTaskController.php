@@ -3,16 +3,31 @@ declare(strict_types=1);
 
 namespace App\Application\Http\Controller;
 
+use App\Domain\Task\Exception\TaskTitleValidateException;
+use App\Domain\Task\TaskTitle;
+use Slim\Exception\HttpBadRequestException;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
 class CreateTaskController implements SlimHttpControllerInterface
 {
+    /**
+     * @throws HttpBadRequestException
+     */
     public function __invoke(Request $request, Response $response, $args): Response
     {
+        $request_body = $request->getParsedBody();
+        if (!isset($request_body['title'])) {
+            throw new HttpBadRequestException($request);
+        }
+        try {
+            $title = new TaskTitle($request_body['title']);
+        } catch (TaskTitleValidateException) {
+            throw new HttpBadRequestException($request);
+        }
         $raw_result = [
             'task' => [
-                1 => 'title1'
+                1 => $title->title()
             ]
         ];
         $result = json_encode($raw_result);

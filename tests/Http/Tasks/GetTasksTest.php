@@ -26,7 +26,14 @@ class GetTasksTest extends TestCase
 
     public function test_post_to_tasks_create()
     {
-        $response = $this->requestPost('POST', '/tasks/create');
+        $raw_request_body = [
+            'title' => 'title1'
+        ];
+        $request_body = json_encode($raw_request_body);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \RuntimeException();
+        }
+        $response = $this->requestPost('/tasks/create', $request_body);
         self::assertSame(200, $response->getStatusCode());
         $expected = <<<'JSON'
 {"task":{"1":"title1"}}
@@ -37,7 +44,7 @@ JSON;
     public function test_post_to_tasks_create_when_params_invalid_return_400()
     {
         $this->markTestIncomplete();
-        $response = $this->requestPost('POST', '/tasks/create');
+        $response = $this->requestPost('/tasks/create');
         self::assertSame(400, $response->getStatusCode());
     }
 
@@ -51,11 +58,15 @@ JSON;
         }
     }
 
-    private function requestPost(string $method, string $path, ): ResponseInterface
+    private function requestPost(string $path, string $request_body, string $form_params=''): ResponseInterface
     {
         $client = new Client();
         try {
-            return $client->request($method, 'http://web'.$path);
+            return $client->request('POST', 'http://web'.$path, [
+                'form_params' => [
+                    'title' => 'title1'
+                ]
+            ]);
         } catch (ClientException $e) {
             return $e->getResponse();
         }
