@@ -26,16 +26,32 @@ class GetTasksTest extends TestCase
 
     public function test_post_to_tasks_create()
     {
-        $response = $this->getResponse('POST', '/tasks/create');
+        $response = $this->requestPost('POST', '/tasks/create');
         self::assertSame(200, $response->getStatusCode());
         $expected = <<<'JSON'
 {"task":{"1":"title1"}}
 JSON;
-
         self::assertSame($expected, (string)$response->getBody());
     }
 
-    private function getResponse(string $method, string $path): ResponseInterface
+    public function test_post_to_tasks_create_when_params_invalid_return_400()
+    {
+        $this->markTestIncomplete();
+        $response = $this->requestPost('POST', '/tasks/create');
+        self::assertSame(400, $response->getStatusCode());
+    }
+
+    private function getResponse(string $method, string $path, ): ResponseInterface
+    {
+        $client = new Client();
+        try {
+            return $client->request($method, 'http://web'.$path);
+        } catch (ClientException $e) {
+            return $e->getResponse();
+        }
+    }
+
+    private function requestPost(string $method, string $path, ): ResponseInterface
     {
         $client = new Client();
         try {
