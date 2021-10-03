@@ -41,6 +41,8 @@ JSON;
     {
         $response = $this->requestPost();
         self::assertSame(400, $response->getStatusCode());
+        $response = $this->requestPost(['title' => '']);
+        self::assertSame(400, $response->getStatusCode());
     }
 
     private function requestGet(): ResponseInterface
