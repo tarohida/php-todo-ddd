@@ -26,14 +26,10 @@ class GetTasksTest extends TestCase
 
     public function test_post_to_tasks_create()
     {
-        $raw_request_body = [
+        $form_params = [
             'title' => 'title1'
         ];
-        $request_body = json_encode($raw_request_body);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \RuntimeException();
-        }
-        $response = $this->requestPost('/tasks/create', $request_body);
+        $response = $this->requestPost($form_params);
         self::assertSame(200, $response->getStatusCode());
         $expected = <<<'JSON'
 {"task":{"1":"title1"}}
@@ -58,14 +54,12 @@ JSON;
         }
     }
 
-    private function requestPost(string $path, string $request_body, string $form_params=''): ResponseInterface
+    private function requestPost(array $form_params=[]): ResponseInterface
     {
         $client = new Client();
         try {
-            return $client->request('POST', 'http://web'.$path, [
-                'form_params' => [
-                    'title' => 'title1'
-                ]
+            return $client->request('POST', 'http://web'. '/tasks/create', [
+                'form_params' => $form_params
             ]);
         } catch (ClientException $e) {
             return $e->getResponse();
