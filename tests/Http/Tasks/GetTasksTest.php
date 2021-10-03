@@ -20,7 +20,7 @@ class GetTasksTest extends TestCase
 {
     public function test_get()
     {
-        $response = $this->getResponse('GET', '/tasks');
+        $response = $this->requestGet();
         self::assertSame(200, $response->getStatusCode());
     }
 
@@ -44,11 +44,11 @@ JSON;
         self::assertSame(400, $response->getStatusCode());
     }
 
-    private function getResponse(string $method, string $path, ): ResponseInterface
+    private function requestGet(): ResponseInterface
     {
         $client = new Client();
         try {
-            return $client->request($method, 'http://web'.$path);
+            return $client->request('GET', 'http://web'. '/tasks');
         } catch (ClientException $e) {
             return $e->getResponse();
         }
