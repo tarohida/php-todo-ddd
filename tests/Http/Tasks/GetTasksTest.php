@@ -39,8 +39,7 @@ JSON;
 
     public function test_post_to_tasks_create_when_params_invalid_return_400()
     {
-        $this->markTestIncomplete();
-        $response = $this->requestPost('/tasks/create');
+        $response = $this->requestPost();
         self::assertSame(400, $response->getStatusCode());
     }
 
