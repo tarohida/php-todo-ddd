@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Application\Http\Controller;
 
+use App\Domain\Task\CreateTaskService;
 use App\Domain\Task\Exception\TaskTitleValidateException;
 use App\Domain\Task\TaskTitle;
 use Slim\Exception\HttpBadRequestException;
@@ -25,6 +26,7 @@ class CreateTaskController implements SlimHttpControllerInterface
         } catch (TaskTitleValidateException) {
             throw new HttpBadRequestException($request);
         }
+        $this->service->serve($title);
         $raw_result = [
             'task' => [
                 1 => $title->title()
@@ -37,4 +39,8 @@ class CreateTaskController implements SlimHttpControllerInterface
         $response->getBody()->write($result);
         return $response;
     }
+
+    public function __construct(
+        private CreateTaskService $service
+    ) {}
 }
