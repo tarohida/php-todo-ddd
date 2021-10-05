@@ -58,7 +58,7 @@ SQL;
     public function createTaskId(): TaskId
     {
         $query = <<<'SQL'
-select nextval('task_id_seq');
+select nextval('tasks_id_seq')
 SQL;
         $pdo_statement = $this->pdo->prepare($query);
         $pdo_statement->execute();

@@ -55,7 +55,9 @@ class TaskRepositoryTest extends TestCase
     public function test_method_getTaskIdFromSequence()
     {
         $data_set = [
-            'nextval' => 1
+            0 => [
+                'nextval' => 1
+            ]
         ];
         $pdo = $this->getPdoMockForFetch($data_set);
         $repository = new TaskRepository($pdo);

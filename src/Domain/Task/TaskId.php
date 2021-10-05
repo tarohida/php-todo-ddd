@@ -14,12 +14,12 @@ class TaskId
      */
     public static function createFromPdoResultRows(array $rows): self
     {
-        if (!isset($rows['nextval']) ||
-            !is_numeric($rows['nextval'])
+        if (!isset($rows[0]['nextval']) ||
+            !is_numeric($rows[0]['nextval'])
         ) {
             throw new TaskIdValidateException();
         }
-        return new self((int)$rows['nextval']);
+        return new self((int)$rows[0]['nextval']);
     }
 
     public function id(): int
