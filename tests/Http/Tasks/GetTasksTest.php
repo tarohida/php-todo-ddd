@@ -45,6 +45,12 @@ JSON;
         self::assertSame(400, $response->getStatusCode());
     }
 
+    public function test_delete_to_tasks_id()
+    {
+        $response = $this->requestDelete();
+        self::assertSame(200, $response->getStatusCode());
+    }
+
     private function requestGet(): ResponseInterface
     {
         $client = new Client();
@@ -62,6 +68,16 @@ JSON;
             return $client->request('POST', 'http://web'. '/tasks/create', [
                 'form_params' => $form_params
             ]);
+        } catch (ClientException $e) {
+            return $e->getResponse();
+        }
+    }
+
+    private function requestDelete(): ResponseInterface
+    {
+        $client = new Client();
+        try {
+            return $client->request('DELETE', 'http://web'. '/tasks/1');
         } catch (ClientException $e) {
             return $e->getResponse();
         }

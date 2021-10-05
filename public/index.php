@@ -47,6 +47,9 @@ $app = AppFactory::create();
 
 $app->get('/tasks', ListTaskController::class);
 $app->post('/tasks/create', CreateTaskController::class);
+$app->delete('/tasks/1', function ($req, $res, $args) {
+    return $res;
+});
 
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
