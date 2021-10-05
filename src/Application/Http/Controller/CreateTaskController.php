@@ -15,7 +15,7 @@ class CreateTaskController implements SlimHttpControllerInterface
     /**
      * @throws HttpBadRequestException
      */
-    public function __invoke(Request $request, Response $response, $args): Response
+    public function __invoke(Request $request, Response $response, array $args): Response
     {
         $request_body = $request->getParsedBody();
         if (!isset($request_body['title'])) {

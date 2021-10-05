@@ -8,5 +8,5 @@ use Slim\Psr7\Response;
 
 interface SlimHttpControllerInterface
 {
-    public function __invoke(Request $request, Response $response, $args): Response;
+    public function __invoke(Request $request, Response $response, array $args): Response;
 }

@@ -11,7 +11,7 @@ use Slim\Psr7\Response;
 
 class ListTaskController implements SlimHttpControllerInterface
 {
-    public function __invoke(Request $request, Response $response, $args): Response
+    public function __invoke(Request $request, Response $response, array $args): Response
     {
         $response->getBody()->write($this->dumpJson($this->service->list()));
         return $response;
