@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 use App\Application\Http\Controller\CreateTaskController;
+use App\Application\Http\Controller\DeleteTaskController;
 use App\Application\Http\Controller\ListTaskController;
 use App\Domain\Task\CreateTaskService;
 use App\Domain\Task\ListTaskService;
@@ -47,9 +48,7 @@ $app = AppFactory::create();
 
 $app->get('/tasks', ListTaskController::class);
 $app->post('/tasks/create', CreateTaskController::class);
-$app->delete('/tasks/1', function ($req, $res, $args) {
-    return $res;
-});
+$app->delete('/tasks/1', DeleteTaskController::class);
 
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
