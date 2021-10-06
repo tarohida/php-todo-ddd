@@ -39,16 +39,21 @@ $container->set(ListTaskController::class, function (ContainerInterface $c) {
 });
 
 $container->set(CreateTaskController::class, function (ContainerInterface $c) {
-    $repository = $c->get(TaskRepository::class);
+    $repository = $c->get(TaskRepositoryInterface::class);
     $service = new CreateTaskService($repository);
     return new CreateTaskController($service);
+});
+
+$container->set(DeleteTaskController::class, function (ContainerInterface $c) {
+    $repository = $c->get(TaskRepositoryInterface::class);
+    return new DeleteTaskController($repository);
 });
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 
 $app->get('/tasks', ListTaskController::class);
 $app->post('/tasks/create', CreateTaskController::class);
-$app->delete('/tasks/1', DeleteTaskController::class);
+$app->delete('/tasks/{id}', DeleteTaskController::class);
 
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
