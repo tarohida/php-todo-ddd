@@ -22,6 +22,17 @@ class TaskId
         return new self((int)$rows[0]['nextval']);
     }
 
+    /**
+     * @throws TaskIdValidateException
+     */
+    public static function createFromRawParam(mixed $param): self
+    {
+        if (!is_numeric($param)) {
+            throw new TaskIdValidateException();
+        }
+        return new self((int)$param);
+    }
+
     public function id(): int
     {
         return $this->id;
