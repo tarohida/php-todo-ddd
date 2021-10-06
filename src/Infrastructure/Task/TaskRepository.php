@@ -69,4 +69,9 @@ SQL;
             throw new PdoReturnUnexpectedResultException(data_set: $data_set);
         }
     }
+
+    public function delete(TaskId $id): void
+    {
+        throw new \LogicException();
+    }
 }
