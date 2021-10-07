@@ -78,7 +78,7 @@ class TaskRepositoryTest extends TestCase
         $statement = $this->createMock(PDOStatement::class);
         $statement->expects(self::once())
             ->method('execute');
-        $statement->expects(self::once())
+        $statement->expects(self::atLeast(1))
             ->method('rowCount')
             ->willReturn(1);
         return $this->getPdoMock($statement);
