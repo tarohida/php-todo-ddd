@@ -25,7 +25,7 @@ class ListTaskController implements SlimHttpControllerInterface
     {
         $raw_result = [];
         foreach ($tasks as $task) {
-            $result[] = [
+            $raw_result[] = [
                 'id' => $task->id(),
                 'title' => $task->title()
             ];
