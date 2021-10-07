@@ -87,7 +87,7 @@ class TaskRepositoryTest extends TestCase
         return $this->getPdoMock($statement);
     }
 
-    public function getPdoMock($statement): PDO|MockObject
+    private function getPdoMock($statement): PDO|MockObject
     {
         $pdo = $this->createMock(PDO::class);
         $pdo->expects(self::once())
