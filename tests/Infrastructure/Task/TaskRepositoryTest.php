@@ -65,6 +65,14 @@ class TaskRepositoryTest extends TestCase
         self::assertSame(1, $task_id->id());
     }
 
+    public function test_method_delete_task()
+    {
+        $pdo = $this->getPdoMockForUpdate();
+        $repository = new TaskRepository($pdo);
+        $task_id = new TaskId(1);
+        $repository->delete($task_id);
+    }
+
     private function getPdoMockForUpdate(): PDO|MockObject
     {
         $statement = $this->createMock(PDOStatement::class);

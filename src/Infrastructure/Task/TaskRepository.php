@@ -72,6 +72,16 @@ SQL;
 
     public function delete(TaskId $id): void
     {
-        throw new \LogicException();
+        $query = <<< 'SQL'
+delete from tasks
+where id = :id
+SQL;
+        $statement = $this->pdo->prepare($query);
+        $statement->bindValue(':id', $id->id());
+        $statement->execute();
+        $affected_row_count = $statement->rowCount();
+        if ($affected_row_count !== 1 && $affected_row_count !== 0) {
+            throw new PdoReturnUnexpectedResultException(data_set: [$affected_row_count]);
+        }
     }
 }
