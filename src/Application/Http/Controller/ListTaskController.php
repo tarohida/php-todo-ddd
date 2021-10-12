@@ -13,7 +13,7 @@ class ListTaskController implements SlimHttpControllerInterface
 {
     public function __invoke(Request $request, Response $response, array $args): Response
     {
-        $response->getBody()->write($this->dumpJson($this->service->list()));
+        $response->getBody()->write($this->dumpJson($this->xxxList()));
         return $response;
     }
 
@@ -21,6 +21,10 @@ class ListTaskController implements SlimHttpControllerInterface
         private ListTaskService $service
     ) { }
 
+    private function xxxList(): TaskList
+    {
+        return $this->service->list();
+    }
     private function dumpJson(TaskList $tasks): bool|string
     {
         $raw_result = [];
