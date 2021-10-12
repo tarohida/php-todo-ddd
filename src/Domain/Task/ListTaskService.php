@@ -9,6 +9,11 @@ class ListTaskService
         private TaskRepositoryInterface $repository
     ) { }
 
+    public function getRepo(): TaskRepositoryInterface
+    {
+        return $this->repository;
+    }
+
     public function list(): TaskList
     {
         return $this->repository->list();

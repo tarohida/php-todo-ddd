@@ -23,7 +23,7 @@ class ListTaskController implements SlimHttpControllerInterface
 
     private function xxxList(): TaskList
     {
-        return $this->service->list();
+        return $this->service->getRepo()->list();
     }
     private function dumpJson(TaskList $tasks): bool|string
     {
