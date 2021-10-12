@@ -5,7 +5,6 @@ use App\Application\Http\Controller\CreateTaskController;
 use App\Application\Http\Controller\DeleteTaskController;
 use App\Application\Http\Controller\ListTaskController;
 use App\Domain\Task\CreateTaskService;
-use App\Domain\Task\ListTaskService;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Infrastructure\Task\TaskRepository;
 use DI\Container;
@@ -26,11 +25,6 @@ $container->set(PDO::class, function () {
 $container->set(TaskRepositoryInterface::class, function (ContainerInterface $c) {
     $pdo = $c->get(PDO::class);
     return new TaskRepository($pdo);
-});
-
-$container->set(ListTaskService::class, function (ContainerInterface $c) {
-    $repository = $c->get(TaskRepositoryInterface::class);
-    return new ListTaskService($repository);
 });
 
 $container->set(ListTaskController::class, function (ContainerInterface $c) {
