@@ -34,8 +34,8 @@ $container->set(ListTaskService::class, function (ContainerInterface $c) {
 });
 
 $container->set(ListTaskController::class, function (ContainerInterface $c) {
-    $service = $c->get(ListTaskService::class);
-    return new ListTaskController($service);
+    $repository = $c->get(TaskRepositoryInterface::class);
+    return new ListTaskController($repository);
 });
 
 $container->set(CreateTaskController::class, function (ContainerInterface $c) {
