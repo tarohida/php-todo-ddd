@@ -12,6 +12,17 @@ class TaskTitle
     /**
      * @throws TaskTitleValidateException
      */
+    public static function createFromRowParam(mixed $param): self
+    {
+        if (!is_string($param)) {
+            throw new TaskTitleValidateException();
+        }
+        return new TaskTitle($param);
+    }
+
+    /**
+     * @throws TaskTitleValidateException
+     */
     public function __construct(string $title)
     {
         if (empty($title)) {

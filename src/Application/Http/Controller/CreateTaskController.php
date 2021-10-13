@@ -18,11 +18,8 @@ class CreateTaskController implements SlimHttpControllerInterface
     public function __invoke(Request $request, Response $response, array $args): Response
     {
         $request_body = $request->getParsedBody();
-        if (!isset($request_body['title'])) {
-            throw new HttpBadRequestException($request);
-        }
         try {
-            $title = new TaskTitle($request_body['title']);
+            $title = TaskTitle::createFromRowParam($request_body['title'] ?? null);
         } catch (TaskTitleValidateException) {
             throw new HttpBadRequestException($request);
         }
