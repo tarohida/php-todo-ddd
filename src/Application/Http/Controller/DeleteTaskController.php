@@ -18,11 +18,8 @@ class DeleteTaskController implements SlimHttpControllerInterface
      */
     public function __invoke(Request $request, Response $response, array $args): Response
     {
-        if (!isset($args['id'])) {
-            throw new HttpBadRequestException($request);
-        }
         try {
-            $id = TaskId::createFromRawParam($args['id']);
+            $id = TaskId::createFromRawParam($args['id'] ?? null);
         } catch (TaskIdValidateException) {
             throw new HttpBadRequestException($request);
         }
