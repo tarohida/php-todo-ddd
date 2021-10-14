@@ -22,10 +22,10 @@ class CreateTaskController implements SlimHttpControllerInterface
         } catch (TaskTitleValidateException) {
             throw new HttpBadRequestException($request);
         }
-        $this->service->serve($title);
+        $task = $this->service->serve($title);
         $raw_result = [
             'task' => [
-                1 => $title->title()
+                $task->id() => $task->title()
             ]
         ];
         $result = json_encode($raw_result);

@@ -32,9 +32,9 @@ class GetTasksTest extends TestCase
         $response = $this->requestPost($form_params);
         self::assertSame(200, $response->getStatusCode());
         $expected = <<<'JSON'
-{"task":{"1":"title1"}}
+/\{\"task\":{\"[1-9][0-9]*\":\"title1\"\}\}/
 JSON;
-        self::assertSame($expected, (string)$response->getBody());
+        self::assertMatchesRegularExpression($expected, (string)$response->getBody());
     }
 
     public function test_post_to_tasks_create_when_params_invalid_return_400()
