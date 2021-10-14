@@ -12,6 +12,7 @@ namespace Tests\Domain\Task;
 
 use App\Domain\Task\CreateTaskService;
 
+use App\Domain\Task\Task;
 use App\Domain\Task\TaskId;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Domain\Task\TaskTitle;
@@ -43,6 +44,9 @@ class CreateTaskServiceTest extends TestCase
         $repository->method('createTaskId')
             ->willReturn($task_id);
         $service = new CreateTaskService($repository);
-        $service->serve($this->title);
+        $task = $service->serve($this->title);
+        self::assertInstanceOf(Task::class, $task);
+        self::assertSame(1, $task->id());
+        self::assertSame($this->title_string, $task->title());
     }
 }
