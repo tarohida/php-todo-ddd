@@ -1,7 +1,7 @@
 {
-    "name": "tarohida/docker-php8-nginx-postgres-composer",
-    "description": "Docker Compose configuration to run PHP8 with Nginx, PHP-FPM, PostgreSQL 10.1 and Composer.",
-    "type": "metapackage",
+    "name": "tarohida/php-todo-ddd",
+    "description": "php todo web application",
+    "type": "project",
     "license": "MIT",
     "authors": [
         {
