@@ -13,12 +13,17 @@ use Slim\Factory\AppFactory;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
+
 $container = new Container();
 $container->set(PDO::class, function () {
+    $db_host = $_ENV['DB_HOST'];
+    $db_name = $_ENV['DB_NAME'];
     return new PDO(
-        'pgsql:host=db;port=5432;dbname=db_name;',
-        'db_user',
-        'db_password'
+        "pgsql:host=$db_host;port=5432;dbname=$db_name;",
+        $_ENV['DB_USER'],
+        $_ENV['DB_PASSWORD']
     );
 });
 
