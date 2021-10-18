@@ -1,6 +1,11 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/vendor/autoload.php';
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 return
 [
     'paths' => [
@@ -12,10 +17,10 @@ return
         'default_environment' => 'development',
         'development' => [
             'adapter' => 'pgsql',
-            'host' => 'db',
-            'name' => 'db_name',
-            'user' => 'db_user',
-            'pass' => 'db_password',
+            'host' => $_ENV['DB_HOST'],
+            'name' => $_ENV['DB_NAME'],
+            'user' => $_ENV['DB_USER'],
+            'pass' => $_ENV['DB_PASSWORD'],
             'port' => '5432',
             'charset' => 'utf8',
         ]
