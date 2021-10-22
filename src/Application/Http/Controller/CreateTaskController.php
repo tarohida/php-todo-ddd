@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Application\Http\Controller;
 
+use App\Application\Http\Controller\Exception\JsonConvertFailedException;
 use App\Domain\Task\CreateTaskService;
 use App\Domain\Task\Exception\TaskTitleValidateException;
 use App\Domain\Task\TaskTitle;
@@ -30,7 +31,7 @@ class CreateTaskController implements SlimHttpControllerInterface
         ];
         $result = json_encode($raw_result);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \RuntimeException();
+            throw new JsonConvertFailedException(params: $raw_result);
         }
         $response->getBody()->write($result);
         return $response;
