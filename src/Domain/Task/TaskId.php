@@ -25,7 +25,7 @@ class TaskId
     /**
      * @throws TaskIdValidateException
      */
-    public static function createFromRawParam(mixed $param): self
+    public static function createFromRequestRawParam(mixed $param): self
     {
         if (!is_numeric($param)) {
             throw new TaskIdValidateException();
