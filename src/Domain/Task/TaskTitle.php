@@ -12,12 +12,12 @@ class TaskTitle
     /**
      * @throws TaskTitleValidateException
      */
-    public static function createFromRowParam(mixed $param): self
+    public static function createFromMixedTypeValue(mixed $param): self
     {
         if (!is_string($param)) {
             throw new TaskTitleValidateException();
         }
-        return new TaskTitle($param);
+        return new self($param);
     }
 
     /**
