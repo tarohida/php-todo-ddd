@@ -64,7 +64,7 @@ SQL;
         $pdo_statement->execute();
         $data_set = $pdo_statement->fetchAll(PDO::FETCH_ASSOC);
         try {
-            return TaskId::createFromPdoResultRows($data_set);
+            return TaskId::createFromMixedTypeValue($data_set[0]['nextval'] ?? null);
         } catch (TaskIdValidateException) {
             throw new PdoReturnUnexpectedResultException(data_set: $data_set);
         }

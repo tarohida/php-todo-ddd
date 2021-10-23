@@ -33,12 +33,8 @@ class TaskIdTest extends TestCase
 
     public function test_method_createFromPdoResultRows()
     {
-        $result_rows = [
-            0 => [
-                'nextval' => 1
-            ]
-        ];
-        $task_id = TaskId::createFromPdoResultRows($result_rows);
+        $id = '1';
+        $task_id = TaskId::createFromMixedTypeValue($id);
         self::assertSame(1, $task_id->id());
     }
 

@@ -12,15 +12,6 @@ class TaskId
     /**
      * @throws TaskIdValidateException
      */
-    public static function createFromPdoResultRows(array $rows): self
-    {
-        $next_val = $rows[0]['nextval'] ?? null;
-        return self::createFromMixedTypeValue($next_val);
-    }
-
-    /**
-     * @throws TaskIdValidateException
-     */
     public static function createFromMixedTypeValue(mixed $param): self
     {
         if (!is_numeric($param)) {
