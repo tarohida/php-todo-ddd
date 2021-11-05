@@ -1,0 +1,42 @@
+{
+    "name": "tarohida/php-todo-ddd",
+    "description": "php todo web application",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Taro Hida",
+            "email": "sk8trou@gmail.com"
+        }
+    ],
+    "require": {
+        "ext-pdo": "*",
+        "robmorgan/phinx": "*",
+        "slim/slim": "*",
+        "slim/psr7": "*",
+        "monolog/monolog": "*",
+        "php-di/php-di": "*",
+        "vlucas/phpdotenv": "^5.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*",
+        "guzzlehttp/guzzle": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "phinx_create_table": "vendor/bin/phinx create CreateTaskTable",
+        "fix_owner": "chown -R 1000.1000 ./db",
+        "migrate": "vendor/bin/phinx migrate",
+        "rollback": "vendor/bin/phinx rollback"
+    }
+}
