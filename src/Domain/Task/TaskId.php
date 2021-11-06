@@ -1,43 +1,38 @@
 <?php
 declare(strict_types=1);
 
-
 namespace App\Domain\Task;
 
+use App\Domain\Task\Exception\TaskIdValidateException;
 
-use App\Domain\Task\Exception\Validate\TaskIdMustBePositiveNumberException;
-
-/**
- * テストはTaskTest経由で実施している。
- *
- * Class TaskId
- * @package App\Domain\Task
- */
 class TaskId
 {
     private int $id;
 
     /**
-     * @throws TaskIdMustBePositiveNumberException
+     * @throws TaskIdValidateException
      */
-    public function __construct(int $id)
+    public static function createFromMixedTypeValue(mixed $param): self
     {
-        $this->validate($id);
-        $this->id = $id;
+        if (!is_numeric($param)) {
+            throw new TaskIdValidateException();
+        }
+        return new self((int)$param);
+    }
+
+    public function id(): int
+    {
+        return $this->id;
     }
 
     /**
-     * @throws TaskIdMustBePositiveNumberException
+     * @throws TaskIdValidateException
      */
-    public static function validate(int $id): void
+    public function __construct(int $task_id)
     {
-        if ($id <= 0) {
-            throw new TaskIdMustBePositiveNumberException();
+        if ($task_id < 0) {
+            throw new TaskIdValidateException();
         }
-    }
-
-    public function getId(): int
-    {
-        return $this->id;
+        $this->id = $task_id;
     }
 }

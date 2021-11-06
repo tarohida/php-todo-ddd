@@ -1,42 +1,39 @@
 <?php
 declare(strict_types=1);
 
-
 namespace App\Domain\Task;
 
-
-use App\Domain\Task\Exception\Validate\TaskIdMustBePositiveNumberException;
-use App\Domain\Task\Exception\Validate\TaskTitleMustNotEmptyException;
+use App\Domain\Task\Exception\TaskValidateException;
 use JetBrains\PhpStorm\Pure;
 
-/**
- * Class Task
- * @package App\Domain\Task
- */
-class Task implements TaskInterface
+class Task
 {
-    private TaskId $id;
-    private TaskTitle $title;
-
     /**
-     * Task constructor.
-     * @param int $id
-     * @param string $title
-     * @throws TaskIdMustBePositiveNumberException
-     * @throws TaskTitleMustNotEmptyException
+     * @throws TaskValidateException
      */
-    public function __construct(int $id, string $title) {
-        $this->id = new TaskId($id);
-        $this->title = new TaskTitle($title);
+    public static function createFromPdoDataSet(array $data): Task
+    {
+        if (!isset($data['id'], $data['title'])) {
+            throw new TaskValidateException();
+        }
+        if (!is_numeric($data['id'])) {
+            throw new TaskValidateException();
+        }
+        return new self(new TaskId((int)$data['id']), new TaskTitle($data['title']));
     }
+
+    public function __construct(
+        private TaskId $id,
+        private TaskTitle $title
+    ) { }
 
     #[Pure] public function id(): int
     {
-        return $this->id->getId();
+        return $this->id->id();
     }
 
     #[Pure] public function title(): string
     {
-        return $this->title->getTitle();
+        return $this->title->title();
     }
 }

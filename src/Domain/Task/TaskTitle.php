@@ -1,42 +1,38 @@
 <?php
 declare(strict_types=1);
 
-
 namespace App\Domain\Task;
 
+use App\Domain\Task\Exception\TaskTitleValidateException;
 
-use App\Domain\Task\Exception\Validate\TaskTitleMustNotEmptyException;
-
-/**
- * テストはTaskTest経由で実施している
- *
- * Class TaskTitle
- * @package App\Domain\Task
- */
 class TaskTitle
 {
     private string $title;
 
     /**
-     * @throws TaskTitleMustNotEmptyException
+     * @throws TaskTitleValidateException
      */
-    public function __construct(string $title)
+    public static function createFromMixedTypeValue(mixed $param): self
     {
-        self::validate($title);
-        $this->title = $title;
-    }
-
-    public function getTitle(): string
-    {
-        return $this->title;
+        if (!is_string($param)) {
+            throw new TaskTitleValidateException();
+        }
+        return new self($param);
     }
 
     /**
-     * @throws \App\Domain\Task\Exception\Validate\TaskTitleMustNotEmptyException
+     * @throws TaskTitleValidateException
      */
-    public static function validate(string $title) {
+    public function __construct(string $title)
+    {
         if (empty($title)) {
-            throw new TaskTitleMustNotEmptyException();
+            throw new TaskTitleValidateException('invalid title');
         }
+        $this->title = $title;
+    }
+
+    public function title(): string
+    {
+        return $this->title;
     }
 }

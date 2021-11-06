@@ -1,130 +1,59 @@
 <?php
 declare(strict_types=1);
 
-use App\Application\Action\TaskCreateAction;
-use App\Application\Action\TaskCreateActionInterface;
-use App\Application\Controller\Http\Api\ListTaskApiController;
-use App\Application\Controller\Http\Api\ListTaskApiControllerInterface;
-use App\Application\Controller\Http\Api\TaskCreateController;
-use App\Application\Controller\Http\Api\TaskCreateControllerInterface;
-use App\Application\Controller\Http\Api\DeleteTaskApiController;
-use App\Application\Controller\Http\Api\DeleteTaskApiControllerInterface;
-use App\Application\Controller\Http\Handler\HttpErrorHandler;
-use App\Application\Controller\Http\Handler\ShutdownHandler;
-use App\Domain\Task\DeleteTaskService;
-use App\Domain\Task\DeleteTaskServiceInterface;
+use App\Application\Http\Controller\CreateTaskController;
+use App\Application\Http\Controller\DeleteTaskController;
+use App\Application\Http\Controller\ListTaskController;
+use App\Domain\Task\CreateTaskService;
 use App\Domain\Task\TaskRepositoryInterface;
-use App\Domain\Task\TaskService;
-use App\Domain\Task\TaskServiceInterface;
 use App\Infrastructure\Task\TaskRepository;
 use DI\Container;
-use DI\DependencyException;
-use DI\NotFoundException;
-use eftec\bladeone\BladeOne;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
 use Slim\Factory\AppFactory;
-use Slim\Factory\ServerRequestCreatorFactory;
 
-require __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
 
 $container = new Container();
 $container->set(PDO::class, function () {
+    $db_host = $_ENV['DB_HOST'];
+    $db_name = $_ENV['DB_NAME'];
     return new PDO(
-        sprintf('pgsql:host=%s;dbname=%s', 'db', 'db_name'),
-        'db_user',
-        'db_password'
+        "pgsql:host=$db_host;port=5432;dbname=$db_name;",
+        $_ENV['DB_USER'],
+        $_ENV['DB_PASSWORD']
     );
 });
-$container->set(BladeOne::class, function () {
-    return new BladeOne(__DIR__.'/../views',__DIR__.'/../compiles');
-});
+
 $container->set(TaskRepositoryInterface::class, function (ContainerInterface $c) {
     $pdo = $c->get(PDO::class);
     return new TaskRepository($pdo);
 });
 
-$container->set(TaskServiceInterface::class, function (ContainerInterface $c) {
+$container->set(ListTaskController::class, function (ContainerInterface $c) {
     $repository = $c->get(TaskRepositoryInterface::class);
-    return new TaskService($repository);
+    return new ListTaskController($repository);
 });
 
-$container->set(TaskCreateActionInterface::class, function (ContainerInterface $c){
+$container->set(CreateTaskController::class, function (ContainerInterface $c) {
     $repository = $c->get(TaskRepositoryInterface::class);
-    return new TaskCreateAction($repository);
+    $service = new CreateTaskService($repository);
+    return new CreateTaskController($service);
 });
 
-$container->set(DeleteTaskServiceInterface::class, function (ContainerInterface $c) {
+$container->set(DeleteTaskController::class, function (ContainerInterface $c) {
     $repository = $c->get(TaskRepositoryInterface::class);
-    return new DeleteTaskService($repository);
+    return new DeleteTaskController($repository);
 });
-
-$container->set(TaskCreateControllerInterface::class, function (ContainerInterface $c) {
-    $action = $c->get(TaskCreateActionInterface::class);
-    return new TaskCreateController($action);
-});
-
-$container->set(ListTaskApiControllerInterface::class, function (ContainerInterface $c) {
-    $repository = $c->get(TaskRepositoryInterface::class);
-    return new ListTaskApiController($repository);
-});
-
-$container->set(DeleteTaskApiControllerInterface::class, function (ContainerInterface $c) {
-    $service = $c->get(DeleteTaskServiceInterface::class);
-    return new DeleteTaskApiController($service);
-});
-
-$container->set(LoggerInterface::class, function () {
-    $formatter = new LineFormatter();
-    $formatter->includeStacktraces(true);
-    $handler = new StreamHandler('php://stdout', Logger::DEBUG);
-    $handler->setFormatter($formatter);
-    $logger = new Logger('php-todo-app');
-    $logger->pushHandler($handler);
-    return $logger;
-});
-
-try {
-    $logger = $container->get(LoggerInterface::class);
-} catch (DependencyException | NotFoundException $e) {
-    die('container error');
-}
-
 AppFactory::setContainer($container);
 $app = AppFactory::create();
-$app->addRoutingMiddleware();
 
-$app->redirect('/', '/api/tasks');
-$app->post('/api/tasks/create', TaskCreateControllerInterface::class);
-$app->get('/api/tasks', ListTaskApiControllerInterface::class);
-$app->delete('/api/tasks/{id}', DeleteTaskApiControllerInterface::class);
-$app->options('/{routes:.+}', function ($request, $response) {
-    return $response;
-});
+$app->get('/tasks', ListTaskController::class);
+$app->post('/tasks/create', CreateTaskController::class);
+$app->delete('/tasks/{id}', DeleteTaskController::class);
 
-$app->add(function ($request, $handler) {
-    $response = $handler->handle($request);
-    return $response
-        ->withHeader('Access-Control-Allow-Origin', 'http://localhost:8080')
-        ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
-        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-});
+$errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
-
-$displayErrorDetails = true;
-
-$callableResolver = $app->getCallableResolver();
-$responseFactory = $app->getResponseFactory();
-
-$serverRequestCreator = ServerRequestCreatorFactory::create();
-$request = $serverRequestCreator->createServerRequestFromGlobals();
-
-$errorHandler = new HttpErrorHandler($callableResolver, $responseFactory, $logger);
-$shutdownHandler = new ShutdownHandler($request, $errorHandler, $displayErrorDetails);
-register_shutdown_function($shutdownHandler);
-$errorMiddleware = $app->addErrorMiddleware($displayErrorDetails, false, false);
-$errorMiddleware->setDefaultErrorHandler($errorHandler);
 $app->run();

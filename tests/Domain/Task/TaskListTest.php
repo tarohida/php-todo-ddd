@@ -11,32 +11,30 @@ declare(strict_types=1);
 namespace Tests\Domain\Task;
 
 use App\Domain\Task\Task;
-
-use App\Domain\Task\TaskId;
-use App\Domain\Task\TaskTitle;
+use App\Domain\Task\TaskList;
 use PHPUnit\Framework\TestCase;
 
-class TaskTest extends TestCase
+class TaskListTest extends TestCase
 {
-    private int $id;
-    private string $title;
-    private Task $task;
+    private TaskList $task_list;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->id = 1;
-        $this->title = 'title1';
-        $this->task = new Task(new TaskId($this->id), new TaskTitle($this->title));
+        $tasks = [
+            $this->createStub(Task::class),
+            $this->createStub(Task::class),
+            $this->createStub(Task::class)
+        ];
+        $this->task_list = new TaskList($tasks);
     }
 
-    public function test_method_id()
+    public function test_foreach()
     {
-        self::assertSame($this->id, $this->task->id());
+        self::assertIsIterable($this->task_list);
+        foreach ($this->task_list as $task) {
+            $this->assertInstanceOf(Task::class, $task);
+        }
     }
 
-    public function test_method_title()
-    {
-        self::assertSame($this->title, $this->task->title());
-    }
 }
