@@ -54,6 +54,18 @@ $app->get('/tasks', ListTaskController::class);
 $app->post('/tasks/create', CreateTaskController::class);
 $app->delete('/tasks/{id}', DeleteTaskController::class);
 
+$app->options('/{routes:.+}', function ($request, $response) {
+    return $response;
+});
+
+$app->add(function ($request, $handler) {
+    $response = $handler->handle($request);
+    return $response
+        ->withHeader('Access-Control-Allow-Origin', 'http://localhost:8080')
+        ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+});
+
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
 $app->run();
