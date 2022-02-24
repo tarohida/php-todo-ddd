@@ -1,4 +1,4 @@
-FROM php:8.0-fpm
+FROM php:8.1-fpm
 
 MAINTAINER Taro Hida <sk8trou@gmail.com>
 
@@ -13,6 +13,3 @@ RUN apt-get update \
     && docker-php-ext-install -j$(nproc) zip \
     && docker-php-ext-install -j$(nproc) pgsql \
     && docker-php-ext-install -j$(nproc) pdo_pgsql
-
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
-

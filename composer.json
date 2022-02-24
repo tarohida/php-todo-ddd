@@ -1,7 +1,7 @@
 {
-    "name": "tarohida/php-todo-ddd",
-    "description": "php todo web application",
-    "type": "project",
+    "name": "tarohida/docker-php80-nginx-postgres-composer",
+    "description": "Docker Compose configuration to run PHP8.0 with Nginx, PHP-FPM, PostgreSQL 10.1 and Composer.",
+    "type": "metapackage",
     "license": "MIT",
     "authors": [
         {
@@ -10,33 +10,14 @@
         }
     ],
     "require": {
-        "ext-pdo": "*",
-        "robmorgan/phinx": "*",
-        "slim/slim": "*",
-        "slim/psr7": "*",
-        "monolog/monolog": "*",
-        "php-di/php-di": "*",
-        "vlucas/phpdotenv": "^5.3"
+        "ext-pdo": "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "*",
-        "guzzlehttp/guzzle": "*"
-    },
-    "autoload": {
-        "psr-4": {
-            "App\\": "src/"
-        }
+        "phpunit/phpunit": "^9.5"
     },
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"
         }
-    },
-    "scripts": {
-        "test": "vendor/bin/phpunit",
-        "phinx_create_table": "vendor/bin/phinx create CreateTaskTable",
-        "fix_owner": "chown -R 1000.1000 ./db",
-        "migrate": "vendor/bin/phinx migrate",
-        "rollback": "vendor/bin/phinx rollback"
     }
 }
