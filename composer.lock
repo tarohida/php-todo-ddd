@@ -4,8 +4,49 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7c97d41dec57ae6047d85f658f0751ef",
-    "packages": [],
+    "content-hash": "1be026da1b60da0f57def3655dc223d7",
+    "packages": [
+        {
+            "name": "tarohida/application-exceptions",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tarohida/application-exceptions.git",
+                "reference": "01325b6c92736f4184a812459115e6f17ca357ad"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tarohida/application-exceptions/zipball/01325b6c92736f4184a812459115e6f17ca357ad",
+                "reference": "01325b6c92736f4184a812459115e6f17ca357ad",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "TaroHida\\ApplicationExceptions\\": "src/TaroHida/ApplicationExceptions"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Taro Hida",
+                    "email": "sk8trou@gmail.com"
+                }
+            ],
+            "description": "exceptions for your application",
+            "support": {
+                "issues": "https://github.com/tarohida/application-exceptions/issues",
+                "source": "https://github.com/tarohida/application-exceptions/tree/v1.0.0"
+            },
+            "time": "2022-01-10T13:46:06+00:00"
+        }
+    ],
     "packages-dev": [
         {
             "name": "doctrine/instantiator",
