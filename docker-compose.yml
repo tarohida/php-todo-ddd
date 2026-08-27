@@ -1,5 +1,6 @@
 x-app-environment: &app-environment
   DB_NAME: &db-name ${DB_NAME:?DB_NAME is required; run scripts/check-env.sh}
+  TEST_DB_NAME: &test-db-name ${TEST_DB_NAME:-todo_test}
   DB_USER: &db-user ${DB_USER:?DB_USER is required; run scripts/check-env.sh}
   DB_PASSWORD: &db-password ${DB_PASSWORD:?DB_PASSWORD is required; run scripts/check-env.sh}
   DB_HOST: &db-host ${DB_HOST:?DB_HOST is required; run scripts/check-env.sh}
@@ -40,6 +41,7 @@ services:
     image: postgres:18.6
     environment:
       POSTGRES_DB: *db-name
+      TEST_DB_NAME: *test-db-name
       POSTGRES_USER: *db-user
       POSTGRES_PASSWORD: *db-password
     healthcheck:

@@ -1,0 +1,10 @@
+services:
+  php:
+    environment:
+      DB_NAME: ${TEST_DB_NAME:-todo_integration_test}
+      DEV_DB_NAME: ${DB_NAME:?DB_NAME is required}
+      TEST_DB_NAME: ${TEST_DB_NAME:-todo_integration_test}
+      HTTP_TEST_BASE_URL: http://web
+
+  web:
+    ports: !reset []
