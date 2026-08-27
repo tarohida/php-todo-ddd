@@ -14,6 +14,7 @@ use App\Domain\Task\Exception\TaskTitleValidateException;
 use App\Domain\Task\TaskTitle;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class TaskTitleTest extends TestCase
 {
@@ -24,10 +25,15 @@ class TaskTitleTest extends TestCase
         $this->assertSame($string, $title->title());
     }
 
-    public function test_construct_throw_Exception()
+    #[DataProvider('blankTitles')]
+    public function test_constructor_rejects_blank_titles(string $title): void
     {
         $this->expectException(TaskTitleValidateException::class);
-        $string = '';
-        new TaskTitle($string);
+        new TaskTitle($title);
+    }
+
+    public static function blankTitles(): array
+    {
+        return [[''], ['   '], ["\t\n"]];
     }
 }

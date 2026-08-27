@@ -25,7 +25,7 @@ class TaskTitle
      */
     public function __construct(string $title)
     {
-        if (empty($title)) {
+        if (trim($title) === '') {
             throw new TaskTitleValidateException('invalid title');
         }
         $this->title = $title;
