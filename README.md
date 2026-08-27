@@ -95,7 +95,9 @@ LEGACY_POSTGRES_VOLUME=<確認したvolume名> scripts/migrate-postgres-10-to-18
 ## 検証コマンド
 
 `composer test:unit` はDB不要の単体テストだけを実行します。
-`composer test:integration` はHTTPとPostgreSQL契約テストを実行します。
+`composer test:integration` はHTTPとPostgreSQL契約テストを実行します。ただし、DBへ意図的に
+不正行を作る排他的テストは除外します。このテストは使い捨てDBを前後にリセットする
+`scripts/test-integration.sh` 内でのみ `composer test:integration:exclusive-database` により実行します。
 `composer test` は両方を順番に実行します。DBを使うコマンドは
 `TEST_DB_NAME`（末尾が `_test` で、`DB_NAME` と異なる名前）だけを
 契約テスト用に準備・マイグレーション・初期化します。通常の開発DBは初期化しません。

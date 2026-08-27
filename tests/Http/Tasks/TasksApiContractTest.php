@@ -13,6 +13,8 @@ namespace Tests\Http\Tasks;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use PDO;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -116,6 +118,39 @@ class TasksApiContractTest extends TestCase
         self::assertStringStartsWith('application/json', $response->getHeaderLine('Content-Type'));
         $body = json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR);
         self::assertArrayHasKey('error', $body);
+    }
+
+    #[Group('exclusive-database')]
+    public function test_unexpected_persistence_failure_returns_generic_json_server_error(): void
+    {
+        $pdo = new PDO(
+            sprintf('pgsql:host=%s;port=5432;dbname=%s', $_ENV['DB_HOST'], $_ENV['DB_NAME']),
+            $_ENV['DB_USER'],
+            $_ENV['DB_PASSWORD'],
+        );
+        $invalidTaskId = null;
+        $inserted = false;
+
+        try {
+            $invalidTaskId = (int) $pdo->query("select nextval('tasks_id_seq')")->fetchColumn();
+            $statement = $pdo->prepare('insert into tasks (id, title) values (:id, :title)');
+            $statement->execute(['id' => $invalidTaskId, 'title' => '']);
+            $inserted = $statement->rowCount() === 1;
+
+            $response = (new Client(['http_errors' => false]))->get($this->baseUrl() . '/tasks');
+
+            self::assertSame(500, $response->getStatusCode());
+            self::assertSame(
+                ['error' => ['status' => 500, 'message' => 'Internal Server Error']],
+                json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR),
+            );
+            self::assertStringNotContainsString('PdoReturnUnexpectedResultException', (string) $response->getBody());
+        } finally {
+            if ($inserted) {
+                $delete = $pdo->prepare('delete from tasks where id = :id');
+                $delete->execute(['id' => $invalidTaskId]);
+            }
+        }
     }
 
     public function test_cors_preflight_returns_configured_headers(): void

@@ -42,8 +42,9 @@
         "test:integration": [
             "php scripts/prepare-test-database.php",
             "vendor/bin/phinx migrate -e testing",
-            "vendor/bin/phpunit --testsuite Integration"
+            "vendor/bin/phpunit --testsuite Integration --exclude-group exclusive-database"
         ],
+        "test:integration:exclusive-database": "vendor/bin/phpunit --testsuite Integration --group exclusive-database",
         "phinx_create_table": "vendor/bin/phinx create CreateTaskTable",
         "fix_owner": "chown -R 1000.1000 ./db",
         "migrate": "vendor/bin/phinx migrate",
