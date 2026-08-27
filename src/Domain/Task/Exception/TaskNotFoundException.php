@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Task\Exception;
 
-final class TaskNotFoundException extends \RuntimeException
+use App\Exception\ApplicationException;
+
+final class TaskNotFoundException extends ApplicationException
 {
 }
