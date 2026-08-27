@@ -18,6 +18,29 @@ docker compose exec php composer migrate
 - Web API: http://localhost:8081/tasks
 - PostgreSQL はホストへ公開せず、Compose ネットワーク内の `db:5432` で利用します。
 
+## Web API 契約
+
+認証なしのAPIをJSONで提供します。JSON本文がある正常時と異常時の
+`Content-Type` は `application/json` です。`DELETE` 成功時は本文がないため、
+`Content-Type` も付与しません。
+
+| Method | Path | Request | Success |
+| --- | --- | --- | --- |
+| `GET` | `/tasks` | なし | `200`、`[{"id":1,"title":"..."}]` |
+| `POST` | `/tasks` | `{"title":"..."}` | `201`、`{"task":{"id":1,"title":"..."}}` |
+| `DELETE` | `/tasks/{id}` | なし | `204` |
+
+空または不正な `title` と不正なIDは `400`、存在しないIDは `404` を返し、
+本文は `{"error":{"status":400,"message":"Bad Request"}}` 形式です。
+IDは先頭ゼロのない正の10進整数だけを受理し、小数、指数表記、空白、0、
+PHP整数範囲を超える値は不正です。
+ブラウザ向けCORSは `ALLOW_ORIGIN_URL` のoriginだけを応答ヘッダーへ設定します。
+
+従来の `POST /tasks/create` は既存クライアント移行用の互換エイリアスとして
+当面維持します。フォーム入力も受け付けますが、レスポンスは標準の `POST /tasks`
+と同じ `201` JSON契約です。新規実装は `/tasks` とJSON入力を使用してください。
+このイテレーションに認証、完了状態、編集、ページングは含みません。
+
 API の公開先は安全のため既定で `127.0.0.1` です。LAN 等から接続する必要がある場合だけ `.env` で `BACKEND_BIND_ADDRESS=0.0.0.0` とし、OS のファイアウォールも設定してください。`BACKEND_PORT` でポートを変更できます。`ALLOW_ORIGIN_URL` にはブラウザで開くフロントエンドのURLを設定します。`.env` はコミットせず、秘密情報を `.env.example` に追加しないでください。
 
 `.env` の `DB_NAME`、`DB_USER`、`DB_PASSWORD` がPHP実行環境とPostgreSQL初期化の唯一の設定元です。従来の `DB_NAME`、`DB_USER`、`DB_PASSWORD`、`DB_HOST`、`ALLOW_ORIGIN_URL` を持つ `.env` はそのまま利用できます。起動前に `scripts/check-env.sh` を実行してください。不足・空・重複キー、または廃止した `POSTGRES_DB`、`POSTGRES_USER`、`POSTGRES_PASSWORD` がある場合、値を表示せずキー名だけを報告します。

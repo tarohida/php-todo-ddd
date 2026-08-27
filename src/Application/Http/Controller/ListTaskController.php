@@ -14,7 +14,7 @@ class ListTaskController implements SlimHttpControllerInterface
     public function __invoke(Request $request, Response $response, array $args): Response
     {
         $response->getBody()->write($this->dumpJson($this->repository->list()));
-        return $response;
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
     public function __construct(

@@ -18,15 +18,20 @@ class CreateTaskController implements SlimHttpControllerInterface
      */
     public function __invoke(Request $request, Response $response, array $args): Response
     {
+        $body = $request->getParsedBody();
+        if (!is_array($body)) {
+            throw new HttpBadRequestException($request);
+        }
         try {
-            $title = TaskTitle::createFromMixedTypeValue($request->getParsedBody()['title'] ?? null);
+            $title = TaskTitle::createFromMixedTypeValue($body['title'] ?? null);
         } catch (TaskTitleValidateException) {
             throw new HttpBadRequestException($request);
         }
         $task = $this->service->serve($title);
         $raw_result = [
             'task' => [
-                $task->id() => $task->title()
+                'id' => $task->id(),
+                'title' => $task->title(),
             ]
         ];
         $result = json_encode($raw_result);
@@ -34,7 +39,9 @@ class CreateTaskController implements SlimHttpControllerInterface
             throw new JsonConvertFailedException(params: $raw_result);
         }
         $response->getBody()->write($result);
-        return $response;
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(201);
     }
 
     public function __construct(
