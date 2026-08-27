@@ -16,6 +16,8 @@ use App\Domain\Task\TaskList;
 use App\Domain\Task\TaskTitle;
 use App\Infrastructure\Task\TaskRepository;
 use App\Domain\Task\Exception\TaskNotFoundException;
+use App\Domain\Task\Exception\TaskTitleValidateException;
+use App\Infrastructure\Pdo\Exception\PdoReturnUnexpectedResultException;
 
 use PDO;
 use PDOStatement;
@@ -44,6 +46,20 @@ class TaskRepositoryTest extends TestCase
         $repository = new TaskRepository($pdo);
         $list = $repository->list();
         self::assertInstanceOf(TaskList::class, $list);
+    }
+
+    public function test_list_translates_an_invalid_database_row_to_an_infrastructure_exception(): void
+    {
+        $repository = new TaskRepository($this->getPdoMockForFetch([
+            ['id' => 1, 'title' => null],
+        ]));
+
+        try {
+            $repository->list();
+            self::fail('An invalid database row must not cross the repository boundary.');
+        } catch (PdoReturnUnexpectedResultException $exception) {
+            self::assertInstanceOf(TaskTitleValidateException::class, $exception->getPrevious());
+        }
     }
 
     public function test_method_save()

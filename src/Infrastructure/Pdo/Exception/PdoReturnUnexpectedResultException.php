@@ -17,7 +17,7 @@ class PdoReturnUnexpectedResultException extends RuntimeException
         return $this->getDebugPrintedString($this->data_set);
     }
 
-    #[Pure] public function __construct($message = '', $code = 0, Throwable $previous = null, private ?array $data_set = null)
+    #[Pure] public function __construct($message = '', $code = 0, ?Throwable $previous = null, private ?array $data_set = null)
     {
         parent::__construct($message, $code, $previous);
     }
