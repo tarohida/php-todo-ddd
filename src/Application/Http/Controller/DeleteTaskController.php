@@ -20,12 +20,8 @@ class DeleteTaskController implements SlimHttpControllerInterface
      */
     public function __invoke(Request $request, Response $response, array $args): Response
     {
-        $rawId = $args['id'] ?? null;
-        if (!is_string($rawId) || preg_match('/^[1-9][0-9]*$/D', $rawId) !== 1 || !$this->fitsInInteger($rawId)) {
-            throw new HttpBadRequestException($request);
-        }
         try {
-            $id = TaskId::createFromMixedTypeValue($rawId);
+            $id = TaskId::createFromMixedTypeValue($args['id'] ?? null);
         } catch (TaskIdValidateException) {
             throw new HttpBadRequestException($request);
         }
@@ -40,11 +36,4 @@ class DeleteTaskController implements SlimHttpControllerInterface
     public function __construct(
         private TaskRepositoryInterface $repository
     ) { }
-
-    private function fitsInInteger(string $id): bool
-    {
-        $maximum = (string) PHP_INT_MAX;
-        return strlen($id) < strlen($maximum)
-            || (strlen($id) === strlen($maximum) && strcmp($id, $maximum) <= 0);
-    }
 }

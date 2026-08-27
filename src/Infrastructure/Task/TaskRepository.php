@@ -15,9 +15,13 @@ use PDO;
 
 class TaskRepository implements TaskRepositoryInterface
 {
+    private TaskRowMapper $rowMapper;
+
     public function __construct(
-        private PDO $pdo
+        private PDO $pdo,
+        ?TaskRowMapper $rowMapper = null,
     ) {
+        $this->rowMapper = $rowMapper ?? new TaskRowMapper();
     }
 
     public function list(): TaskList
@@ -32,7 +36,7 @@ SQL;
         $tasks = [];
         foreach ($data_set as $data) {
              try {
-                 $tasks[] = Task::createFromPdoDataSet($data);
+                 $tasks[] = $this->rowMapper->map($data);
              } catch (TaskValidateException $e) {
                  throw new PdoReturnUnexpectedResultException(previous: $e, data_set:$data_set);
              }

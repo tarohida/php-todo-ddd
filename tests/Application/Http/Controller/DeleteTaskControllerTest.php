@@ -26,6 +26,34 @@ class DeleteTaskControllerTest extends TestCase
         self::assertSame('', $response->getHeaderLine('Content-Type'));
     }
 
+    public function test_accepts_php_int_max_as_a_route_id(): void
+    {
+        $repository = $this->createMock(TaskRepositoryInterface::class);
+        $repository->expects(self::once())
+            ->method('delete')
+            ->with(self::callback(static fn ($id): bool => $id->id() === PHP_INT_MAX));
+        $request = (new ServerRequestFactory())->createServerRequest('DELETE', '/tasks/' . PHP_INT_MAX);
+
+        $response = (new DeleteTaskController($repository))(
+            $request,
+            new Response(),
+            ['id' => (string) PHP_INT_MAX],
+        );
+
+        self::assertSame(204, $response->getStatusCode());
+    }
+
+    public function test_rejects_the_decimal_route_id_immediately_above_php_int_max(): void
+    {
+        $repository = $this->createMock(TaskRepositoryInterface::class);
+        $repository->expects(self::never())->method('delete');
+        $id = self::decimalStringAbovePhpIntMax();
+        $request = (new ServerRequestFactory())->createServerRequest('DELETE', '/tasks/' . $id);
+
+        $this->expectException(HttpBadRequestException::class);
+        (new DeleteTaskController($repository))($request, new Response(), ['id' => $id]);
+    }
+
     #[DataProvider('invalidRouteIds')]
     public function test_rejects_non_canonical_positive_decimal_route_id(string $id): void
     {
@@ -39,6 +67,20 @@ class DeleteTaskControllerTest extends TestCase
 
     public static function invalidRouteIds(): array
     {
-        return [['1.5'], ['1e0'], [' 1'], ['1 '], ['0'], ['01'], ['-1'], [(string) PHP_INT_MAX . '0']];
+        return [['1.5'], ['1e0'], [' 1'], ['1 '], ['0'], ['01'], ['-1']];
+    }
+
+    private static function decimalStringAbovePhpIntMax(): string
+    {
+        $digits = str_split((string) PHP_INT_MAX);
+        for ($index = count($digits) - 1; $index >= 0; --$index) {
+            if ($digits[$index] !== '9') {
+                $digits[$index] = (string) ((int) $digits[$index] + 1);
+                return implode('', $digits);
+            }
+            $digits[$index] = '0';
+        }
+
+        return '1' . implode('', $digits);
     }
 }
