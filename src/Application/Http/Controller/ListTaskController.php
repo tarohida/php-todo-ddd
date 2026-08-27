@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\Application\Http\Controller;
 
 use App\Application\Http\Controller\Exception\JsonConvertFailedException;
+use App\Application\Task\ListTasks;
 use App\Domain\Task\TaskList;
-use App\Domain\Task\TaskRepositoryInterface;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
@@ -13,12 +13,12 @@ class ListTaskController implements SlimHttpControllerInterface
 {
     public function __invoke(Request $request, Response $response, array $args): Response
     {
-        $response->getBody()->write($this->dumpJson($this->repository->list()));
+        $response->getBody()->write($this->dumpJson($this->useCase->execute()));
         return $response->withHeader('Content-Type', 'application/json');
     }
 
     public function __construct(
-        private TaskRepositoryInterface $repository
+        private ListTasks $useCase
     ) { }
 
     private function dumpJson(TaskList $tasks): bool|string
