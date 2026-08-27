@@ -15,6 +15,7 @@ use App\Domain\Task\TaskId;
 use App\Domain\Task\TaskList;
 use App\Domain\Task\TaskTitle;
 use App\Infrastructure\Task\TaskRepository;
+use App\Domain\Task\Exception\TaskNotFoundException;
 
 use PDO;
 use PDOStatement;
@@ -71,6 +72,18 @@ class TaskRepositoryTest extends TestCase
         $repository = new TaskRepository($pdo);
         $task_id = new TaskId(1);
         $repository->delete($task_id);
+    }
+
+    public function test_delete_missing_task_throws_not_found(): void
+    {
+        $statement = $this->createStub(PDOStatement::class);
+        $statement->method('rowCount')->willReturn(0);
+        $pdo = $this->createStub(PDO::class);
+        $pdo->method('prepare')->willReturn($statement);
+        $repository = new TaskRepository($pdo);
+
+        $this->expectException(TaskNotFoundException::class);
+        $repository->delete(new TaskId(2147483647));
     }
 
     private function getPdoMockForUpdate(): PDO|MockObject
