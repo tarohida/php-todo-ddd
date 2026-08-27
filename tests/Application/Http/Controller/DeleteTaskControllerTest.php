@@ -5,6 +5,7 @@ namespace Tests\Application\Http\Controller;
 
 use App\Application\Http\Controller\DeleteTaskController;
 use App\Application\Task\DeleteTask;
+use App\Domain\Task\Exception\TaskNotFoundException;
 use PHPUnit\Framework\TestCase;
 use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Psr7\Response;
@@ -41,6 +42,19 @@ class DeleteTaskControllerTest extends TestCase
         );
 
         self::assertSame(204, $response->getStatusCode());
+    }
+
+    public function test_maps_missing_task_to_not_found(): void
+    {
+        $useCase = $this->createMock(DeleteTask::class);
+        $useCase->expects(self::once())
+            ->method('execute')
+            ->with(self::callback(static fn ($id): bool => $id->id() === 42))
+            ->willThrowException(new TaskNotFoundException());
+        $request = (new ServerRequestFactory())->createServerRequest('DELETE', '/tasks/42');
+
+        $this->expectException(\Slim\Exception\HttpNotFoundException::class);
+        (new DeleteTaskController($useCase))($request, new Response(), ['id' => '42']);
     }
 
     public function test_rejects_the_decimal_route_id_immediately_above_php_int_max(): void

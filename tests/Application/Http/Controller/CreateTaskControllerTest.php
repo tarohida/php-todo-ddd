@@ -74,4 +74,16 @@ class CreateTaskControllerTest extends TestCase
     {
         return [[null], ['title'], [1], [true]];
     }
+
+    public function test_rejects_invalid_title_without_calling_use_case(): void
+    {
+        $service = $this->createMock(CreateTask::class);
+        $service->expects(self::never())->method('execute');
+        $request = (new ServerRequestFactory())
+            ->createServerRequest('POST', '/tasks')
+            ->withParsedBody(['title' => '']);
+
+        $this->expectException(HttpBadRequestException::class);
+        (new CreateTaskController($service))($request, new Response(), []);
+    }
 }
