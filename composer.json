@@ -10,17 +10,18 @@
         }
     ],
     "require": {
+        "php": "^8.5",
         "ext-pdo": "*",
-        "robmorgan/phinx": "*",
-        "slim/slim": "*",
-        "slim/psr7": "*",
-        "monolog/monolog": "*",
-        "php-di/php-di": "*",
-        "vlucas/phpdotenv": "^5.3"
+        "robmorgan/phinx": "^0.16.12",
+        "slim/slim": "^4.15",
+        "slim/psr7": "^1.8",
+        "monolog/monolog": "^3.9",
+        "php-di/php-di": "^7.1",
+        "vlucas/phpdotenv": "^5.6"
     },
     "require-dev": {
-        "phpunit/phpunit": "*",
-        "guzzlehttp/guzzle": "*"
+        "phpunit/phpunit": "^13.3",
+        "guzzlehttp/guzzle": "^8.1"
     },
     "autoload": {
         "psr-4": {
