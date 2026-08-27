@@ -12,7 +12,7 @@ namespace Tests\Application\Http\Controller;
 
 use App\Application\Http\Controller\CreateTaskController;
 
-use App\Domain\Task\CreateTaskService;
+use App\Application\Task\CreateTask;
 use PHPUnit\Framework\TestCase;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
@@ -24,21 +24,21 @@ class CreateTaskControllerTest extends TestCase
 {
     public function test_method_invoke_call_service()
     {
-        $service = $this->createMock(CreateTaskService::class);
+        $service = $this->createMock(CreateTask::class);
         $request = $this->createStub(Request::class);
         $request->method('getParsedBody')
             ->willReturn(['title' => 'title1']);
         $response = new Response();
         $service->expects(self::once())
-            ->method('serve');
+            ->method('execute');
         $controller = new CreateTaskController($service);
         call_user_func($controller, $request, $response, []);
     }
 
     public function test_returns_created_json_response(): void
     {
-        $service = $this->createStub(CreateTaskService::class);
-        $service->method('serve')->willReturn(
+        $service = $this->createStub(CreateTask::class);
+        $service->method('execute')->willReturn(
             new \App\Domain\Task\Task(
                 \App\Domain\Task\TaskId::createFromMixedTypeValue(1),
                 \App\Domain\Task\TaskTitle::createFromMixedTypeValue('Write tests')
@@ -61,8 +61,8 @@ class CreateTaskControllerTest extends TestCase
     #[DataProvider('invalidParsedBodies')]
     public function test_rejects_non_array_or_missing_parsed_body(mixed $body): void
     {
-        $service = $this->createMock(CreateTaskService::class);
-        $service->expects(self::never())->method('serve');
+        $service = $this->createMock(CreateTask::class);
+        $service->expects(self::never())->method('execute');
         $request = $this->createStub(Request::class);
         $request->method('getParsedBody')->willReturn($body);
 

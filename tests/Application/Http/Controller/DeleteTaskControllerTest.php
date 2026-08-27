@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Tests\Application\Http\Controller;
 
 use App\Application\Http\Controller\DeleteTaskController;
-use App\Domain\Task\TaskRepositoryInterface;
+use App\Application\Task\DeleteTask;
 use PHPUnit\Framework\TestCase;
 use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Psr7\Response;
@@ -15,8 +15,8 @@ class DeleteTaskControllerTest extends TestCase
 {
     public function test_returns_no_content_after_deleting_task(): void
     {
-        $repository = $this->createMock(TaskRepositoryInterface::class);
-        $repository->expects(self::once())->method('delete');
+        $repository = $this->createMock(DeleteTask::class);
+        $repository->expects(self::once())->method('execute');
         $request = (new ServerRequestFactory())->createServerRequest('DELETE', '/tasks/1');
 
         $response = (new DeleteTaskController($repository))($request, new Response(), ['id' => '1']);
@@ -28,9 +28,9 @@ class DeleteTaskControllerTest extends TestCase
 
     public function test_accepts_php_int_max_as_a_route_id(): void
     {
-        $repository = $this->createMock(TaskRepositoryInterface::class);
+        $repository = $this->createMock(DeleteTask::class);
         $repository->expects(self::once())
-            ->method('delete')
+            ->method('execute')
             ->with(self::callback(static fn ($id): bool => $id->id() === PHP_INT_MAX));
         $request = (new ServerRequestFactory())->createServerRequest('DELETE', '/tasks/' . PHP_INT_MAX);
 
@@ -45,8 +45,8 @@ class DeleteTaskControllerTest extends TestCase
 
     public function test_rejects_the_decimal_route_id_immediately_above_php_int_max(): void
     {
-        $repository = $this->createMock(TaskRepositoryInterface::class);
-        $repository->expects(self::never())->method('delete');
+        $repository = $this->createMock(DeleteTask::class);
+        $repository->expects(self::never())->method('execute');
         $id = self::decimalStringAbovePhpIntMax();
         $request = (new ServerRequestFactory())->createServerRequest('DELETE', '/tasks/' . $id);
 
@@ -57,8 +57,8 @@ class DeleteTaskControllerTest extends TestCase
     #[DataProvider('invalidRouteIds')]
     public function test_rejects_non_canonical_positive_decimal_route_id(string $id): void
     {
-        $repository = $this->createMock(TaskRepositoryInterface::class);
-        $repository->expects(self::never())->method('delete');
+        $repository = $this->createMock(DeleteTask::class);
+        $repository->expects(self::never())->method('execute');
         $request = (new ServerRequestFactory())->createServerRequest('DELETE', '/tasks/' . $id);
 
         $this->expectException(HttpBadRequestException::class);

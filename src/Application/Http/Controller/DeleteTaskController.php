@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace App\Application\Http\Controller;
 
+use App\Application\Task\DeleteTask;
 use App\Domain\Task\Exception\TaskIdValidateException;
 use App\Domain\Task\Exception\TaskNotFoundException;
 use App\Domain\Task\TaskId;
-use App\Domain\Task\TaskRepositoryInterface;
 use Slim\Exception\HttpBadRequestException;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Psr7\Request;
@@ -26,7 +26,7 @@ class DeleteTaskController implements SlimHttpControllerInterface
             throw new HttpBadRequestException($request);
         }
         try {
-            $this->repository->delete($id);
+            $this->useCase->execute($id);
         } catch (TaskNotFoundException) {
             throw new HttpNotFoundException($request);
         }
@@ -34,6 +34,6 @@ class DeleteTaskController implements SlimHttpControllerInterface
     }
 
     public function __construct(
-        private TaskRepositoryInterface $repository
+        private DeleteTask $useCase
     ) { }
 }

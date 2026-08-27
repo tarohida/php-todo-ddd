@@ -4,7 +4,9 @@ declare(strict_types=1);
 use App\Application\Http\Controller\CreateTaskController;
 use App\Application\Http\Controller\DeleteTaskController;
 use App\Application\Http\Controller\ListTaskController;
-use App\Domain\Task\CreateTaskService;
+use App\Application\Task\CreateTask;
+use App\Application\Task\DeleteTask;
+use App\Application\Task\ListTasks;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Infrastructure\Task\TaskRepository;
 use DI\Container;
@@ -35,18 +37,17 @@ $container->set(TaskRepositoryInterface::class, function (ContainerInterface $c)
 
 $container->set(ListTaskController::class, function (ContainerInterface $c) {
     $repository = $c->get(TaskRepositoryInterface::class);
-    return new ListTaskController($repository);
+    return new ListTaskController(new ListTasks($repository));
 });
 
 $container->set(CreateTaskController::class, function (ContainerInterface $c) {
     $repository = $c->get(TaskRepositoryInterface::class);
-    $service = new CreateTaskService($repository);
-    return new CreateTaskController($service);
+    return new CreateTaskController(new CreateTask($repository));
 });
 
 $container->set(DeleteTaskController::class, function (ContainerInterface $c) {
     $repository = $c->get(TaskRepositoryInterface::class);
-    return new DeleteTaskController($repository);
+    return new DeleteTaskController(new DeleteTask($repository));
 });
 AppFactory::setContainer($container);
 $app = AppFactory::create();

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Application\Http\Controller;
 
 use App\Application\Http\Controller\Exception\JsonConvertFailedException;
-use App\Domain\Task\CreateTaskService;
+use App\Application\Task\CreateTask;
 use App\Domain\Task\Exception\TaskTitleValidateException;
 use App\Domain\Task\TaskTitle;
 use Slim\Exception\HttpBadRequestException;
@@ -27,7 +27,7 @@ class CreateTaskController implements SlimHttpControllerInterface
         } catch (TaskTitleValidateException) {
             throw new HttpBadRequestException($request);
         }
-        $task = $this->service->serve($title);
+        $task = $this->useCase->execute($title);
         $raw_result = [
             'task' => [
                 'id' => $task->id(),
@@ -45,6 +45,6 @@ class CreateTaskController implements SlimHttpControllerInterface
     }
 
     public function __construct(
-        private CreateTaskService $service
+        private CreateTask $useCase
     ) {}
 }
