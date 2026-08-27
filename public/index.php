@@ -9,6 +9,7 @@ use App\Domain\Task\TaskRepositoryInterface;
 use App\Infrastructure\Task\TaskRepository;
 use DI\Container;
 use Psr\Container\ContainerInterface;
+use Slim\Exception\HttpException;
 use Slim\Factory\AppFactory;
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -51,6 +52,7 @@ AppFactory::setContainer($container);
 $app = AppFactory::create();
 
 $app->get('/tasks', ListTaskController::class);
+$app->post('/tasks', CreateTaskController::class);
 $app->post('/tasks/create', CreateTaskController::class);
 $app->delete('/tasks/{id}', DeleteTaskController::class);
 
@@ -58,14 +60,40 @@ $app->options('/{routes:.+}', function ($request, $response) {
     return $response;
 });
 
+$app->addBodyParsingMiddleware();
+
+$errorMiddleware = $app->addErrorMiddleware(false, true, true);
+$responseFactory = $app->getResponseFactory();
+$errorMiddleware->setDefaultErrorHandler(
+    function ($request, \Throwable $exception) use ($responseFactory) {
+        $status = $exception instanceof HttpException ? $exception->getCode() : 500;
+        $messages = [
+            400 => 'Bad Request',
+            404 => 'Not Found',
+            405 => 'Method Not Allowed',
+        ];
+        $body = json_encode([
+            'error' => [
+                'status' => $status,
+                'message' => $messages[$status] ?? 'Internal Server Error',
+            ],
+        ], JSON_THROW_ON_ERROR);
+        $response = $responseFactory->createResponse($status);
+        $response->getBody()->write($body);
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+);
+
 $app->add(function ($request, $handler) {
     $response = $handler->handle($request);
+    if ($request->getHeaderLine('Origin') !== $_ENV['ALLOW_ORIGIN_URL']) {
+        return $response;
+    }
     return $response
         ->withHeader('Access-Control-Allow-Origin', $_ENV['ALLOW_ORIGIN_URL'])
-        ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
-        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+        ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Origin')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
+        ->withHeader('Vary', 'Origin');
 });
-
-$errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
 $app->run();

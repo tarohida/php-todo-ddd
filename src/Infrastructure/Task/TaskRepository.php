@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Task;
 
 use App\Domain\Task\Exception\TaskIdValidateException;
+use App\Domain\Task\Exception\TaskNotFoundException;
 use App\Domain\Task\Exception\TaskValidateException;
 use App\Domain\Task\Task;
 use App\Domain\Task\TaskId;
@@ -50,8 +51,9 @@ SQL;
         $statement->bindValue(':id', $task->id());
         $statement->bindValue(':title', $task->title());
         $statement->execute();
-        if ($statement->rowCount() !== 1) {
-            throw new PdoReturnUnexpectedResultException(data_set: [$statement->rowCount()]);
+        $affectedRows = $statement->rowCount();
+        if ($affectedRows !== 1) {
+            throw new PdoReturnUnexpectedResultException(data_set: [$affectedRows]);
         }
     }
 
@@ -79,8 +81,12 @@ SQL;
         $statement = $this->pdo->prepare($query);
         $statement->bindValue(':id', $id->id());
         $statement->execute();
-        if ($statement->rowCount() !== 1 && $statement->rowCount() !== 0) {
-            throw new PdoReturnUnexpectedResultException(data_set: [$statement->rowCount()]);
+        $affectedRows = $statement->rowCount();
+        if ($affectedRows === 0) {
+            throw new TaskNotFoundException();
+        }
+        if ($affectedRows !== 1) {
+            throw new PdoReturnUnexpectedResultException(data_set: [$affectedRows]);
         }
     }
 }
