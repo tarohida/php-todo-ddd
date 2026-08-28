@@ -16,10 +16,12 @@ use App\Domain\Task\TaskList;
 use App\Domain\Task\TaskTitle;
 use App\Infrastructure\Task\TaskRepository;
 use App\Domain\Task\Exception\TaskNotFoundException;
+use App\Domain\Task\Exception\TaskAlreadyExistsException;
 use App\Domain\Task\Exception\TaskTitleValidateException;
 use App\Infrastructure\Pdo\Exception\PdoReturnUnexpectedResultException;
 
 use PDO;
+use PDOException;
 use PDOStatement;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -65,8 +67,26 @@ class TaskRepositoryTest extends TestCase
     public function test_method_save()
     {
         $task = new Task(new TaskId(1), new TaskTitle('title1'));
-        $repository = new TaskRepository($this->getPdoMockForUpdate());
+        $repository = new TaskRepository($this->getPdoMockForUpdate(2));
         $repository->save($task);
+    }
+
+    public function test_save_translates_a_zero_row_primary_key_conflict(): void
+    {
+        $repository = new TaskRepository($this->getPdoMockForUpdate(2, 0));
+
+        $this->expectException(TaskAlreadyExistsException::class);
+        $repository->save(new Task(new TaskId(1), new TaskTitle('title1')));
+    }
+
+    public function test_save_propagates_an_unrelated_database_failure(): void
+    {
+        $pdoException = new PDOException('duplicate title');
+        $pdoException->errorInfo = ['23505', 7, 'duplicate key violates constraint "tasks_title_key"'];
+        $repository = new TaskRepository($this->getPdoMockForSaveException($pdoException));
+
+        $this->expectExceptionObject($pdoException);
+        $repository->save(new Task(new TaskId(1), new TaskTitle('title1')));
     }
 
     public function test_method_getTaskIdFromSequence()
@@ -102,15 +122,31 @@ class TaskRepositoryTest extends TestCase
         $repository->delete(new TaskId(2147483647));
     }
 
-    private function getPdoMockForUpdate(): PDO|MockObject
+    private function getPdoMockForUpdate(int $statementCount = 1, int $rowCount = 1): PDO|MockObject
     {
         $statement = $this->createMock(PDOStatement::class);
-        $statement->expects(self::once())
+        $statement->expects(self::exactly($statementCount))
             ->method('execute');
         $statement->expects(self::atLeast(1))
             ->method('rowCount')
-            ->willReturn(1);
-        return $this->getPdoMock($statement);
+            ->willReturn($rowCount);
+        $pdo = $this->createMock(PDO::class);
+        $pdo->expects(self::exactly($statementCount))
+            ->method('prepare')
+            ->willReturn($statement);
+        return $pdo;
+    }
+
+    private function getPdoMockForSaveException(PDOException $exception): PDO|MockObject
+    {
+        $sequenceStatement = $this->createStub(PDOStatement::class);
+        $saveStatement = $this->createStub(PDOStatement::class);
+        $saveStatement->method('execute')->willThrowException($exception);
+        $pdo = $this->createMock(PDO::class);
+        $pdo->expects(self::exactly(2))
+            ->method('prepare')
+            ->willReturnOnConsecutiveCalls($sequenceStatement, $saveStatement);
+        return $pdo;
     }
 
     private function getPdoMockForFetch(array $data_set): PDO|MockObject

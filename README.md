@@ -94,6 +94,21 @@ LEGACY_POSTGRES_VOLUME=<確認したvolume名> scripts/migrate-postgres-10-to-18
 
 ## 検証コマンド
 
+`composer test:unit` はDB不要の単体テストだけを実行します。
+`composer test:integration` はHTTPとPostgreSQL契約テストを実行します。ただし、DBへ意図的に
+不正行を作る排他的テストは除外します。このテストは使い捨てDBを前後にリセットする
+`scripts/test-integration.sh` 内でのみ `composer test:integration:exclusive-database` により実行します。
+`composer test` は両方を順番に実行します。DBを使うコマンドは
+`TEST_DB_NAME`（末尾が `_test` で、`DB_NAME` と異なる名前）だけを
+契約テスト用に準備・マイグレーション・初期化します。通常の開発DBは初期化しません。
+さらに専用マーカーが存在することを初期化直前に確認します。既存の `.env` では
+Docker Compose既定の `todo_test` を使用し、必要なら明示的に変更できます。
+
+開発DBに触れず、専用Compose project・volume・portでHTTPを含むmigration往復を
+確認する場合は `scripts/test-integration.sh` を実行します。スクリプトは失敗時も
+専用resourceだけをcleanupし、通常の `DB_NAME` に `tasks` tableが作られていない
+ことまで検証します。
+
 ```bash
 docker compose config
 tests/scripts/check-env-test.sh

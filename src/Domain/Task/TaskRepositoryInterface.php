@@ -6,6 +6,8 @@ namespace App\Domain\Task;
 interface TaskRepositoryInterface
 {
     public function list(): TaskList;
+
+    /** @throws Exception\TaskAlreadyExistsException */
     public function save(Task $task): void;
     public function createTaskId(): TaskId;
     public function delete(TaskId $id): void;

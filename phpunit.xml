@@ -3,8 +3,12 @@
         <testsuite name="Unit">
             <directory>tests</directory>
             <exclude>tests/Http</exclude>
+            <exclude>tests/CheckDockerEnvironment</exclude>
+            <exclude>tests/Infrastructure/Task/PostgresTaskRepositoryContractTest.php</exclude>
         </testsuite>
-        <testsuite name="Http">
+        <testsuite name="Integration">
+            <file>tests/Infrastructure/Task/PostgresTaskRepositoryContractTest.php</file>
+            <directory>tests/CheckDockerEnvironment</directory>
             <directory>tests/Http</directory>
         </testsuite>
     </testsuites>
