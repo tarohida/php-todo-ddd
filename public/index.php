@@ -4,9 +4,11 @@ declare(strict_types=1);
 use App\Application\Http\Controller\CreateTaskController;
 use App\Application\Http\Controller\DeleteTaskController;
 use App\Application\Http\Controller\ListTaskController;
+use App\Application\Http\Controller\UpdateTaskCompletionController;
 use App\Application\Task\CreateTask;
 use App\Application\Task\DeleteTask;
 use App\Application\Task\ListTasks;
+use App\Application\Task\UpdateTaskCompletion;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Infrastructure\Task\TaskRepository;
 use DI\Container;
@@ -49,6 +51,10 @@ $container->set(DeleteTaskController::class, function (ContainerInterface $c) {
     $repository = $c->get(TaskRepositoryInterface::class);
     return new DeleteTaskController(new DeleteTask($repository));
 });
+$container->set(UpdateTaskCompletionController::class, function (ContainerInterface $c) {
+    $repository = $c->get(TaskRepositoryInterface::class);
+    return new UpdateTaskCompletionController(new UpdateTaskCompletion($repository));
+});
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 
@@ -56,6 +62,7 @@ $app->get('/tasks', ListTaskController::class);
 $app->post('/tasks', CreateTaskController::class);
 $app->post('/tasks/create', CreateTaskController::class);
 $app->delete('/tasks/{id}', DeleteTaskController::class);
+$app->patch('/tasks/{id}', UpdateTaskCompletionController::class);
 
 $app->options('/{routes:.+}', function ($request, $response) {
     return $response;
@@ -93,7 +100,7 @@ $app->add(function ($request, $handler) {
     return $response
         ->withHeader('Access-Control-Allow-Origin', $_ENV['ALLOW_ORIGIN_URL'])
         ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Origin')
-        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
         ->withHeader('Vary', 'Origin');
 });
 

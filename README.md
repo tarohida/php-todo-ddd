@@ -26,11 +26,12 @@ docker compose exec php composer migrate
 
 | Method | Path | Request | Success |
 | --- | --- | --- | --- |
-| `GET` | `/tasks` | なし | `200`、`[{"id":1,"title":"..."}]` |
-| `POST` | `/tasks` | `{"title":"..."}` | `201`、`{"task":{"id":1,"title":"..."}}` |
+| `GET` | `/tasks` | なし | `200`、`[{"id":1,"title":"...","completed":false}]` |
+| `POST` | `/tasks` | `{"title":"..."}` | `201`、`{"task":{"id":1,"title":"...","completed":false}}` |
+| `PATCH` | `/tasks/{id}` | `{"completed":true}` | `200`、`{"task":{"id":1,"title":"...","completed":true}}` |
 | `DELETE` | `/tasks/{id}` | なし | `204` |
 
-空または不正な `title` と不正なIDは `400`、存在しないIDは `404` を返し、
+空または不正な `title`、真偽値以外の `completed`、不正なIDは `400`、存在しないIDは `404` を返し、
 本文は `{"error":{"status":400,"message":"Bad Request"}}` 形式です。
 IDは先頭ゼロのない正の10進整数だけを受理し、小数、指数表記、空白、0、
 PHP整数範囲を超える値は不正です。
@@ -39,7 +40,7 @@ PHP整数範囲を超える値は不正です。
 従来の `POST /tasks/create` は既存クライアント移行用の互換エイリアスとして
 当面維持します。フォーム入力も受け付けますが、レスポンスは標準の `POST /tasks`
 と同じ `201` JSON契約です。新規実装は `/tasks` とJSON入力を使用してください。
-このイテレーションに認証、完了状態、編集、ページングは含みません。
+`PATCH` は同じ完了状態を繰り返し指定しても同じタスクを返します。このイテレーションに認証、タイトル編集、ページングは含みません。
 
 API の公開先は安全のため既定で `127.0.0.1` です。LAN 等から接続する必要がある場合だけ `.env` で `BACKEND_BIND_ADDRESS=0.0.0.0` とし、OS のファイアウォールも設定してください。`BACKEND_PORT` でポートを変更できます。`ALLOW_ORIGIN_URL` にはブラウザで開くフロントエンドのURLを設定します。`.env` はコミットせず、秘密情報を `.env.example` に追加しないでください。
 

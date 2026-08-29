@@ -53,7 +53,7 @@ class CreateTaskControllerTest extends TestCase
         self::assertSame(201, $response->getStatusCode());
         self::assertSame('application/json', $response->getHeaderLine('Content-Type'));
         self::assertSame(
-            ['task' => ['id' => 1, 'title' => 'Write tests']],
+            ['task' => ['id' => 1, 'title' => 'Write tests', 'completed' => false]],
             json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR)
         );
     }

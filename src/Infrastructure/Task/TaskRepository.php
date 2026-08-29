@@ -11,6 +11,7 @@ use App\Domain\Task\Task;
 use App\Domain\Task\TaskId;
 use App\Domain\Task\TaskList;
 use App\Domain\Task\TaskRepositoryInterface;
+use App\Domain\Task\TaskCompleted;
 use App\Infrastructure\Pdo\Exception\PdoReturnUnexpectedResultException;
 use PDO;
 
@@ -28,7 +29,7 @@ class TaskRepository implements TaskRepositoryInterface
     public function list(): TaskList
     {
         $sql = <<< SQL
-select id, title
+select id, title, completed
 from tasks
 order by id
 SQL;
@@ -51,13 +52,14 @@ SQL;
         $this->advanceSequencePast($task->id());
         $query = <<<SQL
 insert into tasks
-(id, title) values
-(:id, :title)
+(id, title, completed) values
+(:id, :title, :completed)
 on conflict (id) do nothing
 SQL;
         $statement = $this->pdo->prepare($query);
         $statement->bindValue(':id', $task->id());
         $statement->bindValue(':title', $task->title());
+        $statement->bindValue(':completed', $task->completed(), PDO::PARAM_BOOL);
         $statement->execute();
         $affectedRows = $statement->rowCount();
         if ($affectedRows === 0) {
@@ -117,6 +119,41 @@ SQL;
         }
         if ($affectedRows !== 1) {
             throw new PdoReturnUnexpectedResultException(data_set: [$affectedRows]);
+        }
+    }
+
+    public function find(TaskId $id): Task
+    {
+        $statement = $this->pdo->prepare('select id, title, completed from tasks where id = :id');
+        $statement->bindValue(':id', $id->id(), PDO::PARAM_INT);
+        $statement->execute();
+        $row = $statement->fetch(PDO::FETCH_ASSOC);
+        if ($row === false) {
+            throw new TaskNotFoundException();
+        }
+        try {
+            return $this->rowMapper->map($row);
+        } catch (TaskValidateException $e) {
+            throw new PdoReturnUnexpectedResultException(previous: $e, data_set: [$row]);
+        }
+    }
+
+    public function updateCompletion(TaskId $id, TaskCompleted $completed): Task
+    {
+        $statement = $this->pdo->prepare(
+            'update tasks set completed = :completed where id = :id returning id, title, completed'
+        );
+        $statement->bindValue(':id', $id->id(), PDO::PARAM_INT);
+        $statement->bindValue(':completed', $completed->completed(), PDO::PARAM_BOOL);
+        $statement->execute();
+        $row = $statement->fetch(PDO::FETCH_ASSOC);
+        if ($row === false) {
+            throw new TaskNotFoundException();
+        }
+        try {
+            return $this->rowMapper->map($row);
+        } catch (TaskValidateException $e) {
+            throw new PdoReturnUnexpectedResultException(previous: $e, data_set: [$row]);
         }
     }
 }

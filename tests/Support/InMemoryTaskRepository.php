@@ -9,6 +9,7 @@ use App\Domain\Task\Task;
 use App\Domain\Task\TaskId;
 use App\Domain\Task\TaskList;
 use App\Domain\Task\TaskRepositoryInterface;
+use App\Domain\Task\TaskCompleted;
 
 final class InMemoryTaskRepository implements TaskRepositoryInterface
 {
@@ -53,5 +54,17 @@ final class InMemoryTaskRepository implements TaskRepositoryInterface
             throw new TaskNotFoundException();
         }
         unset($this->tasks[$id->id()]);
+    }
+
+    public function find(TaskId $id): Task
+    {
+        return $this->tasks[$id->id()] ?? throw new TaskNotFoundException();
+    }
+
+    public function updateCompletion(TaskId $id, TaskCompleted $completed): Task
+    {
+        $task = $this->find($id)->withCompletion($completed);
+        $this->tasks[$id->id()] = $task;
+        return $task;
     }
 }
