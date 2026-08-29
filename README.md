@@ -16,6 +16,7 @@ docker compose exec php composer migrate
 ```
 
 - Web API: http://localhost:8081/tasks
+- Health check: http://localhost:8081/health
 - PostgreSQL はホストへ公開せず、Compose ネットワーク内の `db:5432` で利用します。
 
 ## Web API 契約
@@ -27,6 +28,7 @@ docker compose exec php composer migrate
 | Method | Path | Request | Success |
 | --- | --- | --- | --- |
 | `GET` | `/tasks` | なし | `200`、`[{"id":1,"title":"...","completed":false}]` |
+| `GET` | `/health` | なし | `200`、`{"status":"ok","database":"ok"}` |
 | `POST` | `/tasks` | `{"title":"..."}` | `201`、`{"task":{"id":1,"title":"...","completed":false}}` |
 | `PATCH` | `/tasks/{id}` | `{"completed":true}` | `200`、`{"task":{"id":1,"title":"...","completed":true}}` |
 | `DELETE` | `/tasks/{id}` | なし | `204` |
@@ -36,6 +38,11 @@ docker compose exec php composer migrate
 IDは先頭ゼロのない正の10進整数だけを受理し、小数、指数表記、空白、0、
 PHP整数範囲を超える値は不正です。
 ブラウザ向けCORSは `ALLOW_ORIGIN_URL` のoriginだけを応答ヘッダーへ設定します。
+
+`GET /health` はアプリケーションとPostgreSQLの準備状況を返し、Docker Composeの
+PHP healthcheckにも利用します。DBへ接続できない場合は `503` と
+`{"status":"unavailable","database":"unavailable"}` を返します。接続先や例外内容などの
+内部情報はレスポンスへ含めません。
 
 従来の `POST /tasks/create` は既存クライアント移行用の互換エイリアスとして
 当面維持します。フォーム入力も受け付けますが、レスポンスは標準の `POST /tasks`
