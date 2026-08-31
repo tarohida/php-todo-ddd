@@ -10,6 +10,7 @@ use App\Domain\Task\TaskId;
 use App\Domain\Task\TaskList;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Domain\Task\TaskCompleted;
+use App\Domain\Task\TaskTitle;
 
 final class InMemoryTaskRepository implements TaskRepositoryInterface
 {
@@ -64,6 +65,13 @@ final class InMemoryTaskRepository implements TaskRepositoryInterface
     public function updateCompletion(TaskId $id, TaskCompleted $completed): Task
     {
         $task = $this->find($id)->withCompletion($completed);
+        $this->tasks[$id->id()] = $task;
+        return $task;
+    }
+
+    public function updateTitle(TaskId $id, TaskTitle $title): Task
+    {
+        $task = $this->find($id)->withTitle($title);
         $this->tasks[$id->id()] = $task;
         return $task;
     }

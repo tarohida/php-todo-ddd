@@ -34,4 +34,9 @@ class Task
     {
         return new self($this->id, $this->title, $completed);
     }
+
+    public function withTitle(TaskTitle $title): self
+    {
+        return new self($this->id, $title, $this->completed);
+    }
 }

@@ -36,4 +36,15 @@ class TaskTitleTest extends TestCase
     {
         return [[''], ['   '], ["\t\n"]];
     }
+
+    public function test_constructor_rejects_titles_longer_than_database_limit(): void
+    {
+        $this->expectException(TaskTitleValidateException::class);
+        new TaskTitle(str_repeat('あ', 256));
+    }
+
+    public function test_constructor_accepts_a_multibyte_title_at_database_limit(): void
+    {
+        self::assertSame(str_repeat('あ', 255), (new TaskTitle(str_repeat('あ', 255)))->title());
+    }
 }
