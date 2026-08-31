@@ -25,7 +25,8 @@ class TaskTitle
      */
     public function __construct(string $title)
     {
-        if (trim($title) === '') {
+        $characterCount = preg_match_all('/./us', $title);
+        if (trim($title) === '' || $characterCount === false || $characterCount > 255) {
             throw new TaskTitleValidateException('invalid title');
         }
         $this->title = $title;
