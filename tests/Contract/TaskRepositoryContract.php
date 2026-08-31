@@ -58,6 +58,26 @@ abstract class TaskRepositoryContract extends TestCase
         self::assertSame([], $this->taskData());
     }
 
+    final public function test_it_updates_an_existing_task_title(): void
+    {
+        $id = $this->repository->createTaskId();
+        $this->repository->save($this->task($id->id(), 'before', true));
+
+        $updated = $this->repository->updateTitle($id, new TaskTitle('after'));
+
+        self::assertSame($id->id(), $updated->id());
+        self::assertSame('after', $updated->title());
+        self::assertTrue($updated->completed());
+        self::assertSame([['id' => $id->id(), 'title' => 'after', 'completed' => true]], $this->taskData());
+    }
+
+    final public function test_updating_a_missing_task_title_throws_not_found(): void
+    {
+        $this->expectException(TaskNotFoundException::class);
+
+        $this->repository->updateTitle($this->repository->createTaskId(), new TaskTitle('after'));
+    }
+
     final public function test_deleting_a_missing_task_throws_not_found(): void
     {
         $this->expectException(TaskNotFoundException::class);
@@ -119,8 +139,8 @@ abstract class TaskRepositoryContract extends TestCase
         return $data;
     }
 
-    private function task(int $id, string $title): Task
+    private function task(int $id, string $title, bool $completed = false): Task
     {
-        return new Task(new TaskId($id), new TaskTitle($title));
+        return new Task(new TaskId($id), new TaskTitle($title), new TaskCompleted($completed));
     }
 }
