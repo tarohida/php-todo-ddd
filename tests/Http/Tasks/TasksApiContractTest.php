@@ -42,7 +42,11 @@ class TasksApiContractTest extends TestCase
         $response = $this->requestGet();
         self::assertSame(200, $response->getStatusCode());
         self::assertStringStartsWith('application/json', $response->getHeaderLine('Content-Type'));
-        self::assertIsArray(json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR));
+        $tasks = json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR);
+        self::assertIsArray($tasks);
+        foreach ($tasks as $task) {
+            self::assertIsBool($task['completed']);
+        }
     }
 
     public function test_post_json_to_canonical_tasks_endpoint(): void
@@ -57,6 +61,7 @@ class TasksApiContractTest extends TestCase
         self::assertStringStartsWith('application/json', $response->getHeaderLine('Content-Type'));
         $body = json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR);
         self::assertSame('canonical task', $body['task']['title']);
+        self::assertFalse($body['task']['completed']);
         self::assertIsInt($body['task']['id']);
         $this->createdTaskIds[] = $body['task']['id'];
     }
@@ -164,7 +169,7 @@ class TasksApiContractTest extends TestCase
         self::assertSame(200, $response->getStatusCode());
         self::assertSame($allowedOrigin, $response->getHeaderLine('Access-Control-Allow-Origin'));
         self::assertStringContainsString('POST', $response->getHeaderLine('Access-Control-Allow-Methods'));
-        self::assertSame('GET, POST, DELETE, OPTIONS', $response->getHeaderLine('Access-Control-Allow-Methods'));
+        self::assertSame('GET, POST, PATCH, DELETE, OPTIONS', $response->getHeaderLine('Access-Control-Allow-Methods'));
         self::assertSame('Content-Type, Accept, Origin', $response->getHeaderLine('Access-Control-Allow-Headers'));
         self::assertSame('Origin', $response->getHeaderLine('Vary'));
     }
@@ -215,6 +220,42 @@ class TasksApiContractTest extends TestCase
         self::assertSame('', (string) $response->getBody());
         self::assertSame('', $response->getHeaderLine('Content-Type'));
         $this->createdTaskIds = array_values(array_diff($this->createdTaskIds, [$created['task']['id']]));
+    }
+
+    public function test_patch_updates_completion_and_is_idempotent(): void
+    {
+        $created = json_decode((string) $this->requestPost(['title' => 'complete target'])->getBody(), true, flags: JSON_THROW_ON_ERROR);
+        $id = $created['task']['id'];
+        $this->createdTaskIds[] = $id;
+        $client = new Client(['http_errors' => false]);
+        foreach ([true, true, false] as $completed) {
+            $response = $client->patch($this->baseUrl() . '/tasks/' . $id, ['json' => ['completed' => $completed]]);
+            self::assertSame(200, $response->getStatusCode());
+            self::assertSame(['task' => ['id' => $id, 'title' => 'complete target', 'completed' => $completed]],
+                json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR));
+        }
+    }
+
+    #[DataProvider('invalidCompletionBodies')]
+    public function test_patch_rejects_non_boolean_completion(mixed $completed): void
+    {
+        $response = (new Client(['http_errors' => false]))->patch($this->baseUrl() . '/tasks/1', ['json' => ['completed' => $completed]]);
+        self::assertSame(400, $response->getStatusCode());
+    }
+
+    public static function invalidCompletionBodies(): array
+    {
+        return [[1], [0], ['true'], [null]];
+    }
+
+    public function test_patch_missing_task_returns_json_not_found(): void
+    {
+        $response = (new Client(['http_errors' => false]))->patch($this->baseUrl() . '/tasks/2147483647', [
+            'json' => ['completed' => true],
+        ]);
+        self::assertSame(404, $response->getStatusCode());
+        self::assertSame(['error' => ['status' => 404, 'message' => 'Not Found']],
+            json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR));
     }
 
     private function requestGet(): ResponseInterface

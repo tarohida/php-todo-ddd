@@ -32,6 +32,7 @@ class CreateTaskController implements SlimHttpControllerInterface
             'task' => [
                 'id' => $task->id(),
                 'title' => $task->title(),
+                'completed' => $task->completed(),
             ]
         ];
         $result = json_encode($raw_result);

@@ -13,17 +13,18 @@ final class TaskRowMapperTest extends TestCase
 {
     public function test_maps_a_pdo_row_to_a_task(): void
     {
-        $task = (new TaskRowMapper())->map(['id' => '1', 'title' => 'stored task']);
+        $task = (new TaskRowMapper())->map(['id' => '1', 'title' => 'stored task', 'completed' => true]);
 
         self::assertSame(1, $task->id());
         self::assertSame('stored task', $task->title());
+        self::assertTrue($task->completed());
     }
 
     #[DataProvider('invalidIds')]
     public function test_rejects_invalid_ids_with_the_precise_exception(mixed $id): void
     {
         $this->expectException(TaskIdValidateException::class);
-        (new TaskRowMapper())->map(['id' => $id, 'title' => 'task']);
+        (new TaskRowMapper())->map(['id' => $id, 'title' => 'task', 'completed' => false]);
     }
 
     public static function invalidIds(): array
@@ -35,7 +36,7 @@ final class TaskRowMapperTest extends TestCase
     public function test_rejects_invalid_titles_with_the_precise_exception(mixed $title): void
     {
         $this->expectException(TaskTitleValidateException::class);
-        (new TaskRowMapper())->map(['id' => '1', 'title' => $title]);
+        (new TaskRowMapper())->map(['id' => '1', 'title' => $title, 'completed' => false]);
     }
 
     public static function invalidTitles(): array

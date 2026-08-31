@@ -9,6 +9,7 @@ use App\Domain\Task\Task;
 use App\Domain\Task\TaskId;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Domain\Task\TaskTitle;
+use App\Domain\Task\TaskCompleted;
 use PHPUnit\Framework\TestCase;
 
 abstract class TaskRepositoryContract extends TestCase
@@ -35,8 +36,8 @@ abstract class TaskRepositoryContract extends TestCase
         $this->repository->save($this->task($firstId->id(), 'first'));
 
         self::assertSame([
-            ['id' => $firstId->id(), 'title' => 'first'],
-            ['id' => $secondId->id(), 'title' => 'second'],
+            ['id' => $firstId->id(), 'title' => 'first', 'completed' => false],
+            ['id' => $secondId->id(), 'title' => 'second', 'completed' => false],
         ], $this->taskData());
     }
 
@@ -73,6 +74,32 @@ abstract class TaskRepositoryContract extends TestCase
         $this->repository->save($this->task($id->id(), 'duplicate'));
     }
 
+    final public function test_it_finds_and_updates_only_completion_idempotently(): void
+    {
+        $id = $this->repository->createTaskId();
+        $this->repository->save($this->task($id->id(), 'unchanged title'));
+
+        self::assertFalse($this->repository->find($id)->completed());
+        self::assertTrue($this->repository->updateCompletion($id, new TaskCompleted(true))->completed());
+        $again = $this->repository->updateCompletion($id, new TaskCompleted(true));
+        self::assertSame('unchanged title', $again->title());
+        self::assertTrue($again->completed());
+    }
+
+    final public function test_finding_or_updating_a_missing_task_throws_not_found(): void
+    {
+        $id = $this->repository->createTaskId();
+        try {
+            $this->repository->find($id);
+            self::fail('Expected find to throw');
+        } catch (TaskNotFoundException) {
+            self::assertTrue(true);
+        }
+
+        $this->expectException(TaskNotFoundException::class);
+        $this->repository->updateCompletion($id, new TaskCompleted(true));
+    }
+
     final public function test_allocation_advances_past_a_sparse_manually_saved_id(): void
     {
         $allocated = $this->repository->createTaskId();
@@ -82,12 +109,12 @@ abstract class TaskRepositoryContract extends TestCase
         self::assertGreaterThan($arbitraryId, $this->repository->createTaskId()->id());
     }
 
-    /** @return list<array{id: int, title: string}> */
+    /** @return list<array{id: int, title: string, completed: bool}> */
     private function taskData(): array
     {
         $data = [];
         foreach ($this->repository->list() as $task) {
-            $data[] = ['id' => $task->id(), 'title' => $task->title()];
+            $data[] = ['id' => $task->id(), 'title' => $task->title(), 'completed' => $task->completed()];
         }
         return $data;
     }

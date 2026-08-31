@@ -31,7 +31,7 @@ final class ListTaskControllerTest extends TestCase
         self::assertSame(200, $response->getStatusCode());
         self::assertSame('application/json', $response->getHeaderLine('Content-Type'));
         self::assertSame(
-            [['id' => 1, 'title' => 'Write tests']],
+            [['id' => 1, 'title' => 'Write tests', 'completed' => false]],
             json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR),
         );
     }

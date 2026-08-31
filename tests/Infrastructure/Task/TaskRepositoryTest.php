@@ -33,15 +33,18 @@ class TaskRepositoryTest extends TestCase
         $data_set = [
             0 => [
                 'id' => 1,
-                'title' => 'title1'
+                'title' => 'title1',
+                'completed' => false,
             ],
             1 => [
                 'id' => 2,
-                'title' => 'title2'
+                'title' => 'title2',
+                'completed' => false,
             ],
             2 => [
                 'id' => 3,
-                'title' => 'title3'
+                'title' => 'title3',
+                'completed' => false,
             ]
         ];
         $pdo = $this->getPdoMockForFetch($data_set);
@@ -53,7 +56,7 @@ class TaskRepositoryTest extends TestCase
     public function test_list_translates_an_invalid_database_row_to_an_infrastructure_exception(): void
     {
         $repository = new TaskRepository($this->getPdoMockForFetch([
-            ['id' => 1, 'title' => null],
+            ['id' => 1, 'title' => null, 'completed' => false],
         ]));
 
         try {

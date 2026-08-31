@@ -6,6 +6,7 @@ namespace App\Infrastructure\Task;
 use App\Domain\Task\Task;
 use App\Domain\Task\TaskId;
 use App\Domain\Task\TaskTitle;
+use App\Domain\Task\TaskCompleted;
 
 final class TaskRowMapper
 {
@@ -14,6 +15,7 @@ final class TaskRowMapper
         return new Task(
             TaskId::createFromMixedTypeValue($row['id'] ?? null),
             TaskTitle::createFromMixedTypeValue($row['title'] ?? null),
+            TaskCompleted::createFromMixedTypeValue($row['completed'] ?? null),
         );
     }
 }
