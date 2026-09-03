@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use App\Application\Http\Controller\CreateTaskController;
 use App\Application\Http\Controller\DeleteTaskController;
+use App\Application\Http\Controller\HealthCheckController;
 use App\Application\Http\Controller\ListTaskController;
 use App\Application\Http\Controller\UpdateTaskCompletionController;
 use App\Application\Task\CreateTask;
@@ -55,6 +56,9 @@ $container->set(UpdateTaskCompletionController::class, function (ContainerInterf
     $repository = $c->get(TaskRepositoryInterface::class);
     return new UpdateTaskCompletionController(new UpdateTaskCompletion($repository));
 });
+$container->set(HealthCheckController::class, function (ContainerInterface $c) {
+    return new HealthCheckController(static fn (): PDO => $c->get(PDO::class));
+});
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 
@@ -63,6 +67,7 @@ $app->post('/tasks', CreateTaskController::class);
 $app->post('/tasks/create', CreateTaskController::class);
 $app->delete('/tasks/{id}', DeleteTaskController::class);
 $app->patch('/tasks/{id}', UpdateTaskCompletionController::class);
+$app->get('/health', HealthCheckController::class);
 
 $app->options('/{routes:.+}', function ($request, $response) {
     return $response;
