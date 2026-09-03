@@ -28,6 +28,11 @@ docker compose --env-file "$tmp_dir/valid.env" -f "$repo_dir/docker-compose.yml"
             fwrite(STDERR, "Compose DB_HOST must address the db service.\n");
             exit(1);
         }
+        $dbHealthcheck = implode(" ", $config["services"]["db"]["healthcheck"]["test"] ?? []);
+        if (!str_contains($dbHealthcheck, "-h 127.0.0.1")) {
+            fwrite(STDERR, "PostgreSQL healthcheck must verify TCP readiness.\n");
+            exit(1);
+        }
     '
 
 # The legacy format used by this repository contains only these five keys.
