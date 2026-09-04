@@ -11,9 +11,12 @@ final class HealthApiContractTest extends TestCase
     public function test_health_endpoint_reports_application_and_database_ready(): void
     {
         $baseUrl = rtrim($_ENV['HTTP_TEST_BASE_URL'] ?? 'http://web', '/');
-        $response = (new Client(['http_errors' => false]))->get($baseUrl . '/health');
+        $response = (new Client(['http_errors' => false]))->get($baseUrl . '/health', [
+            'headers' => ['X-Request-Id' => 'health-contract-request'],
+        ]);
 
         self::assertSame(200, $response->getStatusCode());
+        self::assertSame('health-contract-request', $response->getHeaderLine('X-Request-Id'));
         self::assertStringStartsWith('application/json', $response->getHeaderLine('Content-Type'));
         self::assertSame(
             ['status' => 'ok', 'database' => 'ok'],

@@ -39,6 +39,17 @@ IDは先頭ゼロのない正の10進整数だけを受理し、小数、指数�
 PHP整数範囲を超える値は不正です。
 ブラウザ向けCORSは `ALLOW_ORIGIN_URL` のoriginだけを応答ヘッダーへ設定します。
 
+すべてのアプリケーション応答に `X-Request-Id` を付与し、同じIDを1行1JSON形式のリクエスト完了ログへ記録します。
+クライアント指定IDは、英数字で始まり英数字・`.`・`_`・`-` だけで構成された1〜64文字の場合だけ使用し、
+それ以外はサーバーで生成します。ログには `request_id`、`method`、queryを除いた `path`、`status`、
+`duration_ms` を記録し、例外による5xxでは `exception_class` だけを追加します。request body、認証ヘッダー、
+例外message/trace、DB接続情報は記録しません。許可済みoriginには `X-Request-Id` の送信と読み取りもCORSで許可します。
+
+Nginx access log も query を含まない `method`、`path`、`status`、`duration_seconds`、`request_id` だけの
+JSONに限定し、コンテナの標準出力へ送ります。Nginx error log は完全なrequest lineを含み得るため `/dev/null` へ破棄し、PHPの画面エラー表示も
+無効にしています。リクエスト障害の調査はアプリの構造化ログを正とします。この構成ではNginx固有のrequest処理エラーを
+事後調査できないトレードオフがあるため、error logを再び有効にする場合はqueryや秘密値を保存しない出力経路を別途用意してください。
+
 `GET /health` はアプリケーションとPostgreSQLの準備状況を返し、Docker Composeの
 PHP healthcheckにも利用します。DBへ接続できない場合は `503` と
 `{"status":"unavailable","database":"unavailable"}` を返します。接続先や例外内容などの

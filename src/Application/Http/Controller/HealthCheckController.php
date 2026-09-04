@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Application\Http\Controller;
 
+use App\Application\Http\Middleware\RequestLogContext;
 use Closure;
 use PDO;
 use Slim\Psr7\Request;
@@ -26,7 +27,11 @@ final class HealthCheckController implements SlimHttpControllerInterface
             if (!$statement->execute()) {
                 throw new \RuntimeException('Database health check failed');
             }
-        } catch (Throwable) {
+        } catch (Throwable $exception) {
+            $requestContext = $request->getAttribute(RequestLogContext::REQUEST_ATTRIBUTE);
+            if ($requestContext instanceof RequestLogContext) {
+                $requestContext->recordException($exception);
+            }
             $status = 503;
             $payload = ['status' => 'unavailable', 'database' => 'unavailable'];
         }
