@@ -4,14 +4,31 @@ set -eu
 repository_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$repository_root"
 
-run_id=$$
+mode=${1:-run}
+case "$mode" in
+  run|--cleanup-only) ;;
+  *) echo "Usage: $0 [--cleanup-only]" >&2; exit 2 ;;
+esac
+
+run_id=${INTEGRATION_RUN_ID:-$$}
+case "$run_id" in
+  ''|*[!0-9_]*)
+    echo "INTEGRATION_RUN_ID must contain only digits and underscores." >&2
+    exit 2
+    ;;
+esac
+if [ "${#run_id}" -gt 24 ]; then
+  echo "INTEGRATION_RUN_ID must be at most 24 characters." >&2
+  exit 2
+fi
+
 export COMPOSE_PROJECT_NAME="php-todo-ddd-integration-$run_id"
 export DB_NAME="todo_integration_admin_$run_id"
 export TEST_DB_NAME="todo_integration_${run_id}_test"
 export DB_USER="todo_integration_$run_id"
 export DB_PASSWORD="integration-local-only-$run_id"
 export DB_HOST=db
-export ALLOW_ORIGIN_URL="http://integration-frontend.test:$run_id"
+export ALLOW_ORIGIN_URL="http://integration-frontend.test"
 export POSTGRES_VOLUME_NAME="php-todo-ddd-integration-$run_id-postgres"
 
 compose() {
@@ -38,10 +55,50 @@ run_exclusive_database_test() {
 }
 
 cleanup() {
-  compose down --volumes --remove-orphans >/dev/null 2>&1 || true
+  compose down --volumes --remove-orphans --rmi local
 }
-trap cleanup EXIT HUP INT TERM
 
+handle_exit() {
+  body_status=$?
+  trap - EXIT
+
+  if cleanup; then
+    cleanup_status=0
+  else
+    cleanup_status=$?
+  fi
+
+  if [ "$cleanup_status" -ne 0 ]; then
+    if [ "$body_status" -ne 0 ]; then
+      echo "Cleanup failed with status $cleanup_status; preserving prior status $body_status." >&2
+    else
+      echo "Cleanup failed with status $cleanup_status." >&2
+    fi
+  fi
+
+  if [ "$body_status" -ne 0 ]; then
+    exit "$body_status"
+  fi
+  exit "$cleanup_status"
+}
+
+if [ "$mode" = "--cleanup-only" ]; then
+  if cleanup; then
+    exit 0
+  else
+    cleanup_status=$?
+    echo "Cleanup failed with status $cleanup_status." >&2
+    exit "$cleanup_status"
+  fi
+fi
+
+trap handle_exit EXIT
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+compose build php
+compose run --rm --no-deps php composer install --prefer-dist --no-progress --no-interaction
 compose up -d db
 compose run --rm php php scripts/prepare-test-database.php
 compose run --rm php vendor/bin/phinx migrate -e testing

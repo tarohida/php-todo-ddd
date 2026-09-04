@@ -105,16 +105,44 @@ LEGACY_POSTGRES_VOLUME=<確認したvolume名> scripts/migrate-postgres-10-to-18
 さらに専用マーカーが存在することを初期化直前に確認します。既存の `.env` では
 Docker Compose既定の `todo_test` を使用し、必要なら明示的に変更できます。
 
-開発DBに触れず、専用Compose project・volume・portでHTTPを含むmigration往復を
-確認する場合は `scripts/test-integration.sh` を実行します。スクリプトは失敗時も
-専用resourceだけをcleanupし、通常の `DB_NAME` に `tasks` tableが作られていない
-ことまで検証します。
+PHP 8.5 と Composer 2.10.2 を利用できるローカル環境では、CI の依存関係・構文・
+Unit 品質ゲートを次の順序で再現できます。`composer install` はコミット済みの
+`composer.lock` に記録されたバージョンをインストールします。
 
 ```bash
-docker compose config
+composer validate --strict --no-interaction
+composer audit --locked --no-interaction
+composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
+php -l phinx.php
+find db public scripts src tests -type f -name '*.php' -exec php -l {} \;
+composer test:unit
 tests/scripts/check-env-test.sh
-docker compose exec php composer test
-docker compose down
+tests/scripts/test-integration-cleanup-test.sh
+tests/scripts/migrate-postgres-guard-test.sh
+```
+
+開発DBに触れず、専用Compose project・volume・networkでHTTPを含むmigration往復を
+確認する場合は `scripts/test-integration.sh` を実行します。スクリプトは失敗時も
+専用resourceだけをcleanupし、同じ使い捨てPostgreSQL cluster内の管理用DBに
+`tasks` tableが作られていないことまで検証します。clean checkout でも、PHP image の
+build と lock file からの依存関係インストールをスクリプト内で行います。
+
+```bash
+test -f .env || cp .env.example .env
+scripts/test-integration.sh
 ```
 
 DBデータも初期化する場合だけ `docker compose down --volumes` を使用します。
+
+### GitHub Actions
+
+`.github/workflows/backend-ci.yml` は `work/20260826-todo-web-api` を対象とする
+pull request と同ブランチへの push で実行されます。同じブランチの古い run は
+cancel され、`GITHUB_TOKEN` はリポジトリ内容の読み取り権限だけを持ちます。
+
+- `Composer and unit tests`: PHP 8.5 / Composer 2.10.2 で lock file の整合性、
+  dependency audit、locked install、PHP 構文、Unit test、環境・移行 guard test を確認します。
+  cache するのは Composer の download cache だけで、`.env` や認証情報は含めません。
+- `Isolated integration and migrations`: run 固有の Compose project、PostgreSQL database、
+  volume を使い、Docker image build、HTTP/DB integration、migration の rollback → migrate
+  往復を確認します。成功・失敗にかかわらず専用 Compose resource を削除します。
