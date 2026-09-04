@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Tests\Application\Http\Controller;
 
 use App\Application\Http\Controller\HealthCheckController;
+use App\Application\Http\Middleware\RequestLogContext;
 use PDO;
 use PDOException;
 use PDOStatement;
@@ -36,10 +37,13 @@ final class HealthCheckControllerTest extends TestCase
 
     public function test_returns_service_unavailable_without_exposing_database_error(): void
     {
+        $requestContext = new RequestLogContext('health-error-request');
         $response = (new HealthCheckController(
             static fn (): PDO => throw new PDOException('password=secret host=private-db'),
         ))(
-            (new ServerRequestFactory())->createServerRequest('GET', '/health'),
+            (new ServerRequestFactory())
+                ->createServerRequest('GET', '/health')
+                ->withAttribute(RequestLogContext::REQUEST_ATTRIBUTE, $requestContext),
             new Response(),
             [],
         );
@@ -52,5 +56,6 @@ final class HealthCheckControllerTest extends TestCase
         );
         self::assertStringNotContainsString('secret', (string) $response->getBody());
         self::assertStringNotContainsString('private-db', (string) $response->getBody());
+        self::assertSame(PDOException::class, $requestContext->exceptionClass());
     }
 }

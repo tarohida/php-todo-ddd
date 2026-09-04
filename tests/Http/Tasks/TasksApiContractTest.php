@@ -75,6 +75,10 @@ class TasksApiContractTest extends TestCase
         ]);
 
         self::assertSame(400, $response->getStatusCode());
+        self::assertMatchesRegularExpression(
+            '/\A[A-Za-z0-9][A-Za-z0-9._-]{0,63}\z/D',
+            $response->getHeaderLine('X-Request-Id'),
+        );
         self::assertStringStartsWith('application/json', $response->getHeaderLine('Content-Type'));
         $body = json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR);
         self::assertArrayHasKey('error', $body);
@@ -142,9 +146,23 @@ class TasksApiContractTest extends TestCase
             $statement->execute(['id' => $invalidTaskId, 'title' => '']);
             $inserted = $statement->rowCount() === 1;
 
-            $response = (new Client(['http_errors' => false]))->get($this->baseUrl() . '/tasks');
+            $response = (new Client(['http_errors' => false]))->get($this->baseUrl() . '/tasks', [
+                'headers' => [
+                    'Origin' => $_ENV['ALLOW_ORIGIN_URL'],
+                    'X-Request-Id' => 'server-error-contract-request',
+                ],
+            ]);
 
             self::assertSame(500, $response->getStatusCode());
+            self::assertSame(
+                'server-error-contract-request',
+                $response->getHeaderLine('X-Request-Id'),
+            );
+            self::assertSame(
+                $_ENV['ALLOW_ORIGIN_URL'],
+                $response->getHeaderLine('Access-Control-Allow-Origin'),
+            );
+            self::assertSame('X-Request-Id', $response->getHeaderLine('Access-Control-Expose-Headers'));
             self::assertSame(
                 ['error' => ['status' => 500, 'message' => 'Internal Server Error']],
                 json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR),
@@ -170,7 +188,11 @@ class TasksApiContractTest extends TestCase
         self::assertSame($allowedOrigin, $response->getHeaderLine('Access-Control-Allow-Origin'));
         self::assertStringContainsString('POST', $response->getHeaderLine('Access-Control-Allow-Methods'));
         self::assertSame('GET, POST, PATCH, DELETE, OPTIONS', $response->getHeaderLine('Access-Control-Allow-Methods'));
-        self::assertSame('Content-Type, Accept, Origin', $response->getHeaderLine('Access-Control-Allow-Headers'));
+        self::assertSame(
+            'Content-Type, Accept, Origin, X-Request-Id',
+            $response->getHeaderLine('Access-Control-Allow-Headers'),
+        );
+        self::assertSame('X-Request-Id', $response->getHeaderLine('Access-Control-Expose-Headers'));
         self::assertSame('Origin', $response->getHeaderLine('Vary'));
     }
 
