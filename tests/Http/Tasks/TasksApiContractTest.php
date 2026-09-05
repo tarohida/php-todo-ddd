@@ -125,6 +125,67 @@ class TasksApiContractTest extends TestCase
         self::assertArrayHasKey('error', $body);
     }
 
+    public function test_patch_updates_title_and_persists_it(): void
+    {
+        $client = new Client(['http_errors' => false]);
+        $created = json_decode((string) $client->post($this->baseUrl() . '/tasks', [
+            'json' => ['title' => 'before'],
+        ])->getBody(), true, flags: JSON_THROW_ON_ERROR);
+        $id = $created['task']['id'];
+        $this->createdTaskIds[] = $id;
+        $completed = $client->patch($this->baseUrl() . '/tasks/' . $id, [
+            'json' => ['completed' => true],
+        ]);
+        self::assertSame(200, $completed->getStatusCode());
+
+        $response = $client->patch($this->baseUrl() . '/tasks/' . $id . '/title', [
+            'json' => ['title' => 'after'],
+        ]);
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertStringStartsWith('application/json', $response->getHeaderLine('Content-Type'));
+        self::assertSame(
+            ['task' => ['id' => $id, 'title' => 'after', 'completed' => true]],
+            json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR),
+        );
+        $tasks = json_decode((string) $client->get($this->baseUrl() . '/tasks')->getBody(), true, flags: JSON_THROW_ON_ERROR);
+        $persisted = array_values(array_filter($tasks, static fn (array $task): bool => $task['id'] === $id));
+        self::assertSame([['id' => $id, 'title' => 'after', 'completed' => true]], $persisted);
+    }
+
+    #[DataProvider('invalidPatchBodies')]
+    public function test_patch_rejects_invalid_title(string $json): void
+    {
+        $response = (new Client(['http_errors' => false]))->patch($this->baseUrl() . '/tasks/1/title', [
+            'headers' => ['Content-Type' => 'application/json'],
+            'body' => $json,
+        ]);
+        self::assertSame(400, $response->getStatusCode());
+        self::assertSame(['error' => ['status' => 400, 'message' => 'Bad Request']], json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR));
+    }
+
+    public static function invalidPatchBodies(): array
+    {
+        return [['{}'], ['{"title":""}'], ['{"title":1}'], [json_encode(['title' => str_repeat('a', 256)], JSON_THROW_ON_ERROR)]];
+    }
+
+    public function test_patch_rejects_invalid_id(): void
+    {
+        $response = (new Client(['http_errors' => false]))->patch($this->baseUrl() . '/tasks/01/title', [
+            'json' => ['title' => 'after'],
+        ]);
+        self::assertSame(400, $response->getStatusCode());
+    }
+
+    public function test_patch_missing_task_returns_not_found(): void
+    {
+        $response = (new Client(['http_errors' => false]))->patch($this->baseUrl() . '/tasks/2147483647/title', [
+            'json' => ['title' => 'after'],
+        ]);
+        self::assertSame(404, $response->getStatusCode());
+        self::assertSame(['error' => ['status' => 404, 'message' => 'Not Found']], json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR));
+    }
+
     #[Group('exclusive-database')]
     public function test_unexpected_persistence_failure_returns_generic_json_server_error(): void
     {

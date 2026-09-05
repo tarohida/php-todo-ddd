@@ -13,4 +13,5 @@ interface TaskRepositoryInterface
     public function find(TaskId $id): Task;
     public function updateCompletion(TaskId $id, TaskCompleted $completed): Task;
     public function delete(TaskId $id): void;
+    public function updateTitle(TaskId $id, TaskTitle $title): Task;
 }

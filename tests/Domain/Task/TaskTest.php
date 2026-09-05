@@ -33,6 +33,16 @@ class TaskTest extends TestCase
         self::assertFalse($task->completed());
         self::assertTrue($updated->completed());
     }
+
+    public function test_it_changes_its_title_without_changing_completion(): void
+    {
+        $task = new Task(new TaskId(1), new TaskTitle('before'));
+
+        $updated = $task->withTitle(new TaskTitle('after'));
+
+        self::assertSame('after', $updated->title());
+        self::assertFalse($updated->completed());
+    }
     private int $id;
     private string $title;
     private Task $task;

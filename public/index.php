@@ -5,10 +5,12 @@ use App\Application\Http\Controller\CreateTaskController;
 use App\Application\Http\Controller\DeleteTaskController;
 use App\Application\Http\Controller\ListTaskController;
 use App\Application\Http\Controller\UpdateTaskCompletionController;
+use App\Application\Http\Controller\UpdateTaskTitleController;
 use App\Application\Task\CreateTask;
 use App\Application\Task\DeleteTask;
 use App\Application\Task\ListTasks;
 use App\Application\Task\UpdateTaskCompletion;
+use App\Application\Task\UpdateTaskTitle;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Infrastructure\Task\TaskRepository;
 use DI\Container;
@@ -55,6 +57,10 @@ $container->set(UpdateTaskCompletionController::class, function (ContainerInterf
     $repository = $c->get(TaskRepositoryInterface::class);
     return new UpdateTaskCompletionController(new UpdateTaskCompletion($repository));
 });
+$container->set(UpdateTaskTitleController::class, function (ContainerInterface $c) {
+    $repository = $c->get(TaskRepositoryInterface::class);
+    return new UpdateTaskTitleController(new UpdateTaskTitle($repository));
+});
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 
@@ -63,6 +69,7 @@ $app->post('/tasks', CreateTaskController::class);
 $app->post('/tasks/create', CreateTaskController::class);
 $app->delete('/tasks/{id}', DeleteTaskController::class);
 $app->patch('/tasks/{id}', UpdateTaskCompletionController::class);
+$app->patch('/tasks/{id}/title', UpdateTaskTitleController::class);
 
 $app->options('/{routes:.+}', function ($request, $response) {
     return $response;

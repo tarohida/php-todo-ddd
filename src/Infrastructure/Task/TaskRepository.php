@@ -12,6 +12,7 @@ use App\Domain\Task\TaskId;
 use App\Domain\Task\TaskList;
 use App\Domain\Task\TaskRepositoryInterface;
 use App\Domain\Task\TaskCompleted;
+use App\Domain\Task\TaskTitle;
 use App\Infrastructure\Pdo\Exception\PdoReturnUnexpectedResultException;
 use PDO;
 
@@ -145,6 +146,29 @@ SQL;
         );
         $statement->bindValue(':id', $id->id(), PDO::PARAM_INT);
         $statement->bindValue(':completed', $completed->completed(), PDO::PARAM_BOOL);
+        $statement->execute();
+        $row = $statement->fetch(PDO::FETCH_ASSOC);
+        if ($row === false) {
+            throw new TaskNotFoundException();
+        }
+        try {
+            return $this->rowMapper->map($row);
+        } catch (TaskValidateException $e) {
+            throw new PdoReturnUnexpectedResultException(previous: $e, data_set: [$row]);
+        }
+    }
+
+    public function updateTitle(TaskId $id, TaskTitle $title): Task
+    {
+        $query = <<<'SQL'
+update tasks
+set title = :title
+where id = :id
+returning id, title, completed
+SQL;
+        $statement = $this->pdo->prepare($query);
+        $statement->bindValue(':id', $id->id(), PDO::PARAM_INT);
+        $statement->bindValue(':title', $title->title());
         $statement->execute();
         $row = $statement->fetch(PDO::FETCH_ASSOC);
         if ($row === false) {
